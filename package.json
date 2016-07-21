@@ -27,7 +27,7 @@
     "es6-promise": "^3.2.1",
     "jquery": "v=1.12.3",
     "loglevel": "^1.4.1",
-    "parsleyjs": "2.3.13",
+    "parsleyjs": "2.4.3",
     "autolinker": "0.26.0"
   }
 }
