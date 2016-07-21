@@ -10,7 +10,8 @@
   },
   "browserify-shim": {
     "jquery": "global:$",
-    "parsleyjs": "global:Parsley"
+    "parsleyjs": "global:Parsley",
+    "autolinker": "global:Autolinker"
   },
   "devDependencies": {
     "browserify": "^13.0.1",
