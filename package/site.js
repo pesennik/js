@@ -320,6 +320,10 @@ function countdown(refreshSeconds, formatter, timeBlockId, timeLeftBlockId, comp
         countdown(refreshSeconds, formatter, timeBlockId, timeLeftBlockId, completionCallback);
     }, refreshSeconds * 1000);
 }
+function removeServerSideParsleyError(el) {
+    var p = $(el).parsley();
+    p.removeError("server-side-parsley-error");
+}
 exports.__esModule = true;
 exports["default"] = {
     setTitle: setTitle,
@@ -332,7 +336,8 @@ exports["default"] = {
     limitTextArea: limitTextArea,
     enableScrollTop: enableScrollTop,
     moveCaretToEnd: moveCaretToEnd,
-    countdown: countdown
+    countdown: countdown,
+    removeServerSideParsleyError: removeServerSideParsleyError
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})

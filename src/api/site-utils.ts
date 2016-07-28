@@ -1,5 +1,6 @@
 import * as $ from "jquery";
 import * as Autolinker from "autolinker";
+import * as Parsley from "parsleyjs";
 import links from "./links";
 
 function setTitle(selector:string, title:string, root?:HTMLElement):void {
@@ -185,6 +186,11 @@ function countdown(refreshSeconds:number, formatter:Function, timeBlockId:string
 }
 
 
+function removeServerSideParsleyError(el:HTMLElement) {
+    var p: Parsley = $(el).parsley();
+    p.removeError("server-side-parsley-error");
+}
+
 export default {
     setTitle: setTitle,
     linkify: linkify,
@@ -196,5 +202,6 @@ export default {
     limitTextArea: limitTextArea,
     enableScrollTop: enableScrollTop,
     moveCaretToEnd: moveCaretToEnd,
-    countdown: countdown
+    countdown: countdown,
+    removeServerSideParsleyError: removeServerSideParsleyError
 }
