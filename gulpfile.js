@@ -12,12 +12,12 @@ gulp.task("build", function () {
         .transform(shim)
         .bundle()
         .pipe(source("site.js"))
-        .pipe(gulp.dest("./package/"));
+        .pipe(gulp.dest("./dist/"));
 
-    gulp.src("./package/site.js")
+    gulp.src("./dist/site.js")
         .pipe(rename({extname: '.min.js'}))
         .pipe(uglify())
-        .pipe(gulp.dest("./package/"));
+        .pipe(gulp.dest("./dist/"));
 });
 
 

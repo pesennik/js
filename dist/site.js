@@ -146,6 +146,9 @@ if (window.Parsley) {
 "use strict";
 exports.__esModule = true;
 exports["default"] = {
+    /** Guitar Tuner API */
+    Tuner: undefined,
+    /** Set of utility functions */
     Utils: undefined
 };
 
@@ -342,14 +345,146 @@ exports["default"] = {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./links":1}],5:[function(require,module,exports){
+(function (global){
+"use strict";
+var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
+var Tuner = (function () {
+    function Tuner(options) {
+        var _this = this;
+        this.buttons = [];
+        this.stopped = false;
+        this.$el = $(options.selector);
+        this.$repeat = this.$el.find(".tuner-repeat-checkbox");
+        this.$toneTypeSelector = this.$el.find(".tuner-tone-type-selector");
+        this.readLastState();
+        var toneType = this.$toneTypeSelector.val();
+        var tonesPath = options.tonesPath ? options.tonesPath : "/tones";
+        var _loop_1 = function(toneIdx) {
+            $b = this_1.$el.find(".tuner-button-s" + toneIdx);
+            if ($b.length <= 0) {
+                return "continue";
+            }
+            var b = { $el: $b, audio: document.createElement('audio'), toneIdx: toneIdx };
+            b.audio.setAttribute("src", tonesPath + "/" + toneType + toneIdx + ".mp3");
+            b.$el.click(function () {
+                if (b.audio.paused) {
+                    _this.play(b);
+                }
+                else {
+                    _this.stop();
+                }
+            });
+            this_1.registerAudio(b);
+            this_1.buttons.push(b);
+            Tuner.updateButtonUI(b);
+        };
+        var this_1 = this;
+        var $b;
+        for (var toneIdx = 1; toneIdx <= 6; toneIdx++) {
+            var state_1 = _loop_1(toneIdx);
+            if (state_1 === "continue") continue;
+        }
+        this.$toneTypeSelector.change(function () {
+            var toneType = _this.$toneTypeSelector.val();
+            for (var i = 0; i < _this.buttons.length; i++) {
+                var b = _this.buttons[i];
+                b.audio.remove();
+                b.audio = document.createElement('audio');
+                b.audio.setAttribute("src", tonesPath + "/" + toneType + b.toneIdx + ".mp3");
+                _this.registerAudio(b);
+            }
+            _this.saveState();
+        });
+        this.$repeat.change(function () {
+            _this.saveState();
+        });
+        $(document).keypress(function (e) {
+            if (e.which >= 49 && e.which <= 54) {
+                _this.$el.find(".tuner-button-s" + String.fromCharCode(e.which)).click();
+            }
+            else if (e.which == 90 || e.which == 122) {
+                _this.$repeat.click();
+            }
+        });
+    }
+    Tuner.prototype.registerAudio = function (b) {
+        var self = this;
+        b.audio.addEventListener("pause", function () {
+            Tuner.updateButtonUI(b);
+        });
+        b.audio.addEventListener("playing", function () {
+            Tuner.updateButtonUI(b);
+        });
+        b.audio.addEventListener("ended", function () {
+            if (self.$repeat.is(":checked") && !self.stopped) {
+                self.play(b);
+                return;
+            }
+            Tuner.updateButtonUI(b);
+        });
+    };
+    Tuner.prototype.stop = function () {
+        this.stopped = true;
+        this.pauseAll();
+    };
+    Tuner.prototype.pauseAll = function () {
+        for (var i = 0; i < this.buttons.length; i++) {
+            var b = this.buttons[i];
+            b.audio.pause();
+        }
+    };
+    Tuner.prototype.play = function (b) {
+        this.pauseAll();
+        b.audio.currentTime = 0;
+        this.stopped = false;
+        b.audio.play();
+    };
+    Tuner.updateButtonUI = function (b) {
+        b.$el.removeClass(b.audio.paused ? "tuner-button-on" : "tuner-button-off");
+        b.$el.addClass(b.audio.paused ? "tuner-button-off" : "tuner-button-on");
+    };
+    Tuner.prototype.saveState = function () {
+        var state = {
+            tone: this.$toneTypeSelector.val(),
+            repeat: this.$repeat.prop("checked")
+        };
+        var cookieVal = JSON.stringify(state);
+        setCookie("tuner", cookieVal);
+    };
+    Tuner.prototype.readLastState = function () {
+        var cookieVal = getCookie("tuner");
+        var state = JSON.parse(cookieVal);
+        this.$repeat.prop("checked", state.repeat == true);
+        this.$toneTypeSelector.val(state.tone ? state.tone : "c");
+    };
+    return Tuner;
+}());
+function setCookie(key, value) {
+    document.cookie = key + '=' + value + ';expires=Fri, 31 Dec 9999 23:59:59 GMT';
+}
+function getCookie(key) {
+    var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+    return keyValue ? keyValue[2] : "{}";
+}
+function init(options) {
+    return new Tuner(options);
+}
+exports.__esModule = true;
+exports["default"] = {
+    init: init
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],6:[function(require,module,exports){
 "use strict";
 var site_def_1 = require("./api/site-def");
 require("./api/parsley-translations");
 var site_utils_1 = require("./api/site-utils");
-/** Set of utility functions */
+var tuner_1 = require("./api/tuner");
+site_def_1["default"].Tuner = tuner_1["default"];
 site_def_1["default"].Utils = site_utils_1["default"];
 window.$site = site_def_1["default"];
 
-},{"./api/parsley-translations":2,"./api/site-def":3,"./api/site-utils":4}],6:[function(require,module,exports){
+},{"./api/parsley-translations":2,"./api/site-def":3,"./api/site-utils":4,"./api/tuner":5}],7:[function(require,module,exports){
 
-},{}]},{},[5,6]);
+},{}]},{},[6,7]);
