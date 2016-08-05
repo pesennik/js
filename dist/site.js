@@ -358,14 +358,14 @@ var Tuner = (function () {
         this.$toneTypeSelector = this.$el.find(".tuner-tone-type-selector");
         this.readLastState();
         var toneType = this.$toneTypeSelector.val();
-        var tonesPath = options.tonesPath ? options.tonesPath : "/tones";
+        this.tonesPath = options.tonesPath ? options.tonesPath : "/tones";
         var _loop_1 = function(toneIdx) {
             $b = this_1.$el.find(".tuner-button-s" + toneIdx);
             if ($b.length <= 0) {
                 return "continue";
             }
             var b = { $el: $b, audio: document.createElement('audio'), toneIdx: toneIdx };
-            b.audio.setAttribute("src", tonesPath + "/" + toneType + toneIdx + ".mp3");
+            b.audio.setAttribute("src", this_1.tonesPath + "/" + toneType + toneIdx + ".mp3");
             b.$el.click(function () {
                 if (b.audio.paused) {
                     _this.play(b);
@@ -377,6 +377,7 @@ var Tuner = (function () {
             this_1.registerAudio(b);
             this_1.buttons.push(b);
             Tuner.updateButtonUI(b);
+            this_1.lastPlayed = this_1.lastPlayed ? this_1.lastPlayed : b;
         };
         var this_1 = this;
         var $b;
@@ -384,20 +385,8 @@ var Tuner = (function () {
             var state_1 = _loop_1(toneIdx);
             if (state_1 === "continue") continue;
         }
-        this.$toneTypeSelector.change(function () {
-            var toneType = _this.$toneTypeSelector.val();
-            for (var i = 0; i < _this.buttons.length; i++) {
-                var b = _this.buttons[i];
-                b.audio.remove();
-                b.audio = document.createElement('audio');
-                b.audio.setAttribute("src", tonesPath + "/" + toneType + b.toneIdx + ".mp3");
-                _this.registerAudio(b);
-            }
-            _this.saveState();
-        });
-        this.$repeat.change(function () {
-            _this.saveState();
-        });
+        this.$toneTypeSelector.change(function () { return _this.updateActiveTone(); });
+        this.$repeat.change(function () { return _this.saveState(); });
         $(document).keypress(function (e) {
             if (e.which >= 49 && e.which <= 54) {
                 _this.$el.find(".tuner-button-s" + String.fromCharCode(e.which)).click();
@@ -405,8 +394,31 @@ var Tuner = (function () {
             else if (e.which == 90 || e.which == 122) {
                 _this.$repeat.click();
             }
+            else if (e.which == 32 || e.which == 67 || e.which == 99) {
+                _this.togglePlay();
+            }
+            else if (e.which == 65 || e.which == 97) {
+                _this.playPrev();
+            }
+            else if (e.which == 83 || e.which == 115) {
+                _this.playNext();
+            }
+            else if (e.which == 88 || e.which == 120) {
+                _this.nextTone();
+            }
         });
     }
+    Tuner.prototype.updateActiveTone = function () {
+        var toneType = this.$toneTypeSelector.val();
+        for (var i = 0; i < this.buttons.length; i++) {
+            var b = this.buttons[i];
+            b.audio.remove();
+            b.audio = document.createElement('audio');
+            b.audio.setAttribute("src", this.tonesPath + "/" + toneType + b.toneIdx + ".mp3");
+            this.registerAudio(b);
+        }
+        this.saveState();
+    };
     Tuner.prototype.registerAudio = function (b) {
         var self = this;
         b.audio.addEventListener("pause", function () {
@@ -438,6 +450,53 @@ var Tuner = (function () {
         b.audio.currentTime = 0;
         this.stopped = false;
         b.audio.play();
+        this.lastPlayed = b;
+    };
+    Tuner.prototype.togglePlay = function () {
+        if (this.lastPlayed.audio.paused) {
+            this.play(this.lastPlayed);
+        }
+        else {
+            this.stop();
+        }
+    };
+    Tuner.prototype.playPrev = function () {
+        var currentToneIdx = this.lastPlayed.toneIdx;
+        var prev;
+        for (var i = 0; i < this.buttons.length; i++) {
+            var b = this.buttons[i];
+            if (b.toneIdx < currentToneIdx) {
+                if (!prev || b.toneIdx > prev.toneIdx) {
+                    prev = b;
+                }
+            }
+        }
+        prev = prev ? prev : this.buttons[this.buttons.length - 1];
+        this.play(prev);
+    };
+    Tuner.prototype.playNext = function () {
+        var currentToneIdx = this.lastPlayed.toneIdx;
+        var next;
+        for (var i = 0; i < this.buttons.length; i++) {
+            var b = this.buttons[i];
+            if (b.toneIdx > currentToneIdx) {
+                if (!next || b.toneIdx < next.toneIdx) {
+                    next = b;
+                }
+            }
+        }
+        next = next ? next : this.buttons[0];
+        this.play(next);
+    };
+    Tuner.prototype.nextTone = function () {
+        var $selected = this.$toneTypeSelector.find("option:selected");
+        var $next = $selected.next();
+        if ($next.length == 0) {
+            $next = this.$toneTypeSelector.find("option").first();
+        }
+        $selected.prop("selected", false);
+        $next.prop("selected", true);
+        this.updateActiveTone();
     };
     Tuner.updateButtonUI = function (b) {
         b.$el.removeClass(b.audio.paused ? "tuner-button-on" : "tuner-button-off");
