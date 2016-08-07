@@ -61,18 +61,18 @@ class Tuner {
         this.$toneTypeSelector.change(() => this.updateActiveTone());
         this.$repeat.change(()=> this.saveState());
 
-        $(document).keypress((e: KeyboardEvent) => {
+        $(document).keydown((e: KeyboardEvent) => {
             if (e.which >= 49 && e.which <= 54) { // 1,2,3,4,5,6
                 this.$el.find(".tuner-button-s" + String.fromCharCode(e.which)).click();
-            } else if (e.which == 90 || e.which == 122) { // 'Z' or 'z'
-                this.$repeat.click();
-            } else if (e.which == 32 || e.which == 67 || e.which == 99) { // space or 'C' or 'c'
-                this.togglePlay();
-            } else if (e.which == 65 || e.which == 97) { // 'A' or 'a'
+            } else if (e.which == 37 || e.which == 90 || e.which == 122) { // left arrow or Z
                 this.playPrev();
-            } else if (e.which == 83 || e.which == 115) { // 'S' or 's'
+            } else if (e.which == 39 || e.which == 88 || e.which == 120) { // right arrow or X
                 this.playNext();
-            } else if (e.which == 88 || e.which == 120) { // 'X' or 'x'
+            } else if (e.which == 32 || e.which == 67 || e.which == 99) { // space or C
+                this.togglePlay();
+            } else if (e.which == 86 || e.which == 118 || e.which == 48 || e.which == 45 || e.which == 96) { // V or 0 (3 forms)
+                this.$repeat.click();
+            } else if (e.which == 38 || e.which == 40 || e.which == 66 || e.which == 98) { // up/down or B
                 this.nextTone();
             }
         });

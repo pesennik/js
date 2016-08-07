@@ -387,23 +387,23 @@ var Tuner = (function () {
         }
         this.$toneTypeSelector.change(function () { return _this.updateActiveTone(); });
         this.$repeat.change(function () { return _this.saveState(); });
-        $(document).keypress(function (e) {
+        $(document).keydown(function (e) {
             if (e.which >= 49 && e.which <= 54) {
                 _this.$el.find(".tuner-button-s" + String.fromCharCode(e.which)).click();
             }
-            else if (e.which == 90 || e.which == 122) {
-                _this.$repeat.click();
+            else if (e.which == 37 || e.which == 90 || e.which == 122) {
+                _this.playPrev();
+            }
+            else if (e.which == 39 || e.which == 88 || e.which == 120) {
+                _this.playNext();
             }
             else if (e.which == 32 || e.which == 67 || e.which == 99) {
                 _this.togglePlay();
             }
-            else if (e.which == 65 || e.which == 97) {
-                _this.playPrev();
+            else if (e.which == 86 || e.which == 118 || e.which == 48 || e.which == 45 || e.which == 96) {
+                _this.$repeat.click();
             }
-            else if (e.which == 83 || e.which == 115) {
-                _this.playNext();
-            }
-            else if (e.which == 88 || e.which == 120) {
+            else if (e.which == 38 || e.which == 40 || e.which == 66 || e.which == 98) {
                 _this.nextTone();
             }
         });
