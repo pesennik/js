@@ -1,9 +1,10 @@
 import * as $ from "jquery";
 import * as Autolinker from "autolinker";
 import * as Parsley from "parsleyjs";
+import SongView from "./song-view";
 import links from "./links";
 
-function setTitle(selector:string, title:string, root?:HTMLElement):void {
+function setTitle(selector: string, title: string, root?: HTMLElement): void {
     root = root ? root : window.document.body;
     $(root).find(selector).each(function () {
         if (!$(this).attr("title")) {
@@ -13,10 +14,10 @@ function setTitle(selector:string, title:string, root?:HTMLElement):void {
 }
 
 interface LinkifyOptions {
-    skipMediaLinks:boolean;
+    skipMediaLinks: boolean;
 }
 
-function linkify(text:string, options:LinkifyOptions):string {
+function linkify(text: string, options: LinkifyOptions): string {
     var autolinker = new Autolinker({
         urls: {
             schemeMatches: true,
@@ -51,13 +52,13 @@ function linkify(text:string, options:LinkifyOptions):string {
     }
 }
 
-function focusOnEnter(event:KeyboardEvent, id:string):void {
+function focusOnEnter(event: KeyboardEvent, id: string): void {
     if (event.which === 13) {
         $(id).focus();
         event.preventDefault();
     }
 }
-function clickOnEnter(event:KeyboardEvent, id:number):void {
+function clickOnEnter(event: KeyboardEvent, id: number): void {
     let keyCode = (event.which ? event.which : event.keyCode);
     if ((keyCode === 10 || keyCode === 13) && !event.ctrlKey) {
         $(id).click();
@@ -65,7 +66,7 @@ function clickOnEnter(event:KeyboardEvent, id:number):void {
     }
 }
 
-function clickOnCtrlEnter(event:KeyboardEvent, id:number):void {
+function clickOnCtrlEnter(event: KeyboardEvent, id: number): void {
     let keyCode = (event.which ? event.which : event.keyCode);
     if ((keyCode === 10 || keyCode === 13) && event.ctrlKey) {
         $(id).click();
@@ -73,7 +74,7 @@ function clickOnCtrlEnter(event:KeyboardEvent, id:number):void {
     }
 }
 
-function showMenuByClick(e:Event, id:string):boolean {
+function showMenuByClick(e: Event, id: string): boolean {
     let evt = e ? e : window.event;
     if (evt && evt.stopPropagation) {
         evt.stopPropagation();
@@ -86,12 +87,12 @@ function showMenuByClick(e:Event, id:string):boolean {
 }
 
 
-function getURLParameter(name:string):string {
+function getURLParameter(name: string): string {
     let regExp = new RegExp("[?|&]" + name + "=" + "([^&;]+?)(&|#|;|$)");
     return decodeURIComponent((regExp.exec(location.search) || [undefined, ""])[1].replace(/\+/g, "%20")) || undefined;
 }
 
-function limitTextArea($textArea:JQuery, $feedback:JQuery, $button:JQuery, maxTextLen:number, minRemainingToShow:number):void {
+function limitTextArea($textArea: JQuery, $feedback: JQuery, $button: JQuery, maxTextLen: number, minRemainingToShow: number): void {
     let f = function () {
         let remaining = maxTextLen - $textArea.val().length;
         if (remaining <= minRemainingToShow) {
@@ -116,7 +117,7 @@ function limitTextArea($textArea:JQuery, $feedback:JQuery, $button:JQuery, maxTe
 }
 
 
-function enableScrollTop():void {
+function enableScrollTop(): void {
     $(document).ready(() => {
         let $backTop = $("#back-top");
         if (!$backTop) {
@@ -141,7 +142,7 @@ function enableScrollTop():void {
     });
 }
 
-function moveCaretToEnd(el:HTMLTextAreaElement):void {
+function moveCaretToEnd(el: HTMLTextAreaElement): void {
     if (typeof el.selectionStart === "number") {
         el.selectionStart = el.selectionEnd = el.value.length;
     } else if (typeof el.createTextRange !== "undefined") {
@@ -152,41 +153,7 @@ function moveCaretToEnd(el:HTMLTextAreaElement):void {
     }
 }
 
-function countdown(refreshSeconds:number, formatter:Function, timeBlockId:string, timeLeftBlockId:string, completionCallback:Function):void {
-    let timeBlock = document.getElementById(timeBlockId);
-    if (!timeBlock) {
-        return;
-    }
-    let timeString = timeBlock.getAttribute("utc-date");
-    if (!timeString) {
-        return;
-    }
-    let targetTime = Date.parse(timeString);
-    if (!targetTime) {
-        return;
-    }
-    let timeLeftBlock = document.getElementById(timeLeftBlockId);
-    let millisLeft = targetTime - new Date().getTime();
-    if (millisLeft <= 0) {
-        timeLeftBlock.innerHTML = formatter(0, 0);
-        if (completionCallback) {
-            //TODO: add min callback period before enabling. completionCallback();
-        }
-        return;
-    }
-    let millisPerMinute = 60 * 1000;
-    let millisPerHour = 60 * millisPerMinute;
-    let hoursLeft = parseInt("" + (millisLeft / millisPerHour), 10);
-    let minutesLeft = parseInt("" + Math.round((millisLeft - hoursLeft * millisPerHour) / millisPerMinute), 10);
-    timeLeftBlock.innerHTML = formatter(hoursLeft, minutesLeft);
-
-    setTimeout(() => {
-        countdown(refreshSeconds, formatter, timeBlockId, timeLeftBlockId, completionCallback);
-    }, refreshSeconds * 1000);
-}
-
-
-function removeServerSideParsleyError(el:HTMLElement) {
+function removeServerSideParsleyError(el: HTMLElement) {
     var p: Parsley = $(el).parsley();
     p.removeError("server-side-parsley-error");
 }
@@ -202,6 +169,6 @@ export default {
     limitTextArea: limitTextArea,
     enableScrollTop: enableScrollTop,
     moveCaretToEnd: moveCaretToEnd,
-    countdown: countdown,
-    removeServerSideParsleyError: removeServerSideParsleyError
+    removeServerSideParsleyError: removeServerSideParsleyError,
+    renderSong: SongView.renderSong
 }

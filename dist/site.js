@@ -157,6 +157,7 @@ exports["default"] = {
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
 var Autolinker = (typeof window !== "undefined" ? window['Autolinker'] : typeof global !== "undefined" ? global['Autolinker'] : null);
+var song_view_1 = require("./song-view");
 var links_1 = require("./links");
 function setTitle(selector, title, root) {
     root = root ? root : window.document.body;
@@ -293,36 +294,6 @@ function moveCaretToEnd(el) {
         range.select();
     }
 }
-function countdown(refreshSeconds, formatter, timeBlockId, timeLeftBlockId, completionCallback) {
-    var timeBlock = document.getElementById(timeBlockId);
-    if (!timeBlock) {
-        return;
-    }
-    var timeString = timeBlock.getAttribute("utc-date");
-    if (!timeString) {
-        return;
-    }
-    var targetTime = Date.parse(timeString);
-    if (!targetTime) {
-        return;
-    }
-    var timeLeftBlock = document.getElementById(timeLeftBlockId);
-    var millisLeft = targetTime - new Date().getTime();
-    if (millisLeft <= 0) {
-        timeLeftBlock.innerHTML = formatter(0, 0);
-        if (completionCallback) {
-        }
-        return;
-    }
-    var millisPerMinute = 60 * 1000;
-    var millisPerHour = 60 * millisPerMinute;
-    var hoursLeft = parseInt("" + (millisLeft / millisPerHour), 10);
-    var minutesLeft = parseInt("" + Math.round((millisLeft - hoursLeft * millisPerHour) / millisPerMinute), 10);
-    timeLeftBlock.innerHTML = formatter(hoursLeft, minutesLeft);
-    setTimeout(function () {
-        countdown(refreshSeconds, formatter, timeBlockId, timeLeftBlockId, completionCallback);
-    }, refreshSeconds * 1000);
-}
 function removeServerSideParsleyError(el) {
     var p = $(el).parsley();
     p.removeError("server-side-parsley-error");
@@ -339,12 +310,44 @@ exports["default"] = {
     limitTextArea: limitTextArea,
     enableScrollTop: enableScrollTop,
     moveCaretToEnd: moveCaretToEnd,
-    countdown: countdown,
-    removeServerSideParsleyError: removeServerSideParsleyError
+    removeServerSideParsleyError: removeServerSideParsleyError,
+    renderSong: song_view_1["default"].renderSong
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./links":1}],5:[function(require,module,exports){
+},{"./links":1,"./song-view":5}],5:[function(require,module,exports){
+(function (global){
+"use strict";
+var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
+function renderSong(options) {
+    var text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    var lines = text.split("\n");
+    var buf = "";
+    for (var i = 0; i < lines.length; i++, buf += "\n") {
+        var line = lines[i];
+        var partStartIdx = 0;
+        var idx = 0;
+        while ((idx = line.indexOf("(", partStartIdx)) >= 0) {
+            var endIdx = line.indexOf(")", idx + 1);
+            if (endIdx < 0) {
+                break;
+            }
+            var note = line.substring(idx + 1, endIdx);
+            buf += line.substring(partStartIdx, idx);
+            buf += "<sup style='color:#2b6e44'>" + note + "</sup>";
+            partStartIdx = endIdx + 1;
+        }
+        buf += line.substring(partStartIdx);
+    }
+    $(options.targetSelector).html(buf);
+}
+exports.__esModule = true;
+exports["default"] = {
+    renderSong: renderSong
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],6:[function(require,module,exports){
 (function (global){
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
@@ -534,7 +537,7 @@ exports["default"] = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 var site_def_1 = require("./api/site-def");
 require("./api/parsley-translations");
@@ -544,6 +547,6 @@ site_def_1["default"].Tuner = tuner_1["default"];
 site_def_1["default"].Utils = site_utils_1["default"];
 window.$site = site_def_1["default"];
 
-},{"./api/parsley-translations":2,"./api/site-def":3,"./api/site-utils":4,"./api/tuner":5}],7:[function(require,module,exports){
+},{"./api/parsley-translations":2,"./api/site-def":3,"./api/site-utils":4,"./api/tuner":6}],8:[function(require,module,exports){
 
-},{}]},{},[6,7]);
+},{}]},{},[7,8]);
