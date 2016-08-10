@@ -298,6 +298,25 @@ function removeServerSideParsleyError(el) {
     var p = $(el).parsley();
     p.removeError("server-side-parsley-error");
 }
+var lastIdx = -1;
+function scrollToRandomSong() {
+    var $songs = $(".song-block");
+    var nSongs = $songs.length;
+    if (nSongs == 0) {
+        return;
+    }
+    var idx = -1;
+    do {
+        idx = Math.floor(Math.random() * nSongs);
+    } while (idx == lastIdx && nSongs > 1);
+    lastIdx = idx;
+    var $song = $($songs.get(idx));
+    var offset = $song.offset();
+    offset.top -= 20;
+    $("html, body").animate({
+        scrollTop: offset.top
+    });
+}
 exports.__esModule = true;
 exports["default"] = {
     setTitle: setTitle,
@@ -311,7 +330,8 @@ exports["default"] = {
     enableScrollTop: enableScrollTop,
     moveCaretToEnd: moveCaretToEnd,
     removeServerSideParsleyError: removeServerSideParsleyError,
-    renderSong: song_view_1["default"].renderSong
+    renderSong: song_view_1["default"].renderSong,
+    scrollToRandomSong: scrollToRandomSong
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
