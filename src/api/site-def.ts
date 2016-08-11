@@ -6,4 +6,6 @@ export default {
     /** Set of utility functions */
     Utils: undefined,
 
+    /** Song rendering engine */
+    SongView: undefined,
 }

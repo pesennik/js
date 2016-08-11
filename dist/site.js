@@ -149,7 +149,9 @@ exports["default"] = {
     /** Guitar Tuner API */
     Tuner: undefined,
     /** Set of utility functions */
-    Utils: undefined
+    Utils: undefined,
+    /** Song rendering engine */
+    SongView: undefined
 };
 
 },{}],4:[function(require,module,exports){
@@ -157,7 +159,6 @@ exports["default"] = {
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
 var Autolinker = (typeof window !== "undefined" ? window['Autolinker'] : typeof global !== "undefined" ? global['Autolinker'] : null);
-var song_view_1 = require("./song-view");
 var links_1 = require("./links");
 function setTitle(selector, title, root) {
     root = root ? root : window.document.body;
@@ -312,7 +313,7 @@ function scrollToRandomSong() {
     lastIdx = idx;
     var $song = $($songs.get(idx));
     var offset = $song.offset();
-    offset.top -= 20;
+    // offset.top -= 20;
     $("html, body").animate({
         scrollTop: offset.top
     });
@@ -330,21 +331,35 @@ exports["default"] = {
     enableScrollTop: enableScrollTop,
     moveCaretToEnd: moveCaretToEnd,
     removeServerSideParsleyError: removeServerSideParsleyError,
-    renderSong: song_view_1["default"].renderSong,
     scrollToRandomSong: scrollToRandomSong
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./links":1,"./song-view":5}],5:[function(require,module,exports){
+},{"./links":1}],5:[function(require,module,exports){
 (function (global){
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
-function renderSong(options) {
-    var text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+var ChordsViewMode;
+(function (ChordsViewMode) {
+    ChordsViewMode[ChordsViewMode["Inlined"] = 0] = "Inlined";
+    ChordsViewMode[ChordsViewMode["NoChords"] = 1] = "NoChords";
+})(ChordsViewMode || (ChordsViewMode = {}));
+function parseSong(text) {
+    var song = { couplets: [] };
+    var couplet = null;
     var lines = text.split("\n");
-    var buf = "";
-    for (var i = 0; i < lines.length; i++, buf += "\n") {
+    for (var i = 0; i < lines.length; i++) {
         var line = lines[i];
+        if (line.trim().length == 0) {
+            couplet = null;
+            continue;
+        }
+        if (couplet == null) {
+            couplet = { lines: [] };
+            song.couplets.push(couplet);
+        }
+        var svLine = { text: "", chords: [] };
+        couplet.lines.push(svLine);
         var partStartIdx = 0;
         var idx = 0;
         while ((idx = line.indexOf("(", partStartIdx)) >= 0) {
@@ -352,12 +367,52 @@ function renderSong(options) {
             if (endIdx < 0) {
                 break;
             }
-            var note = line.substring(idx + 1, endIdx);
-            buf += line.substring(partStartIdx, idx);
-            buf += "<sup style='color:#2b6e44'>" + note + "</sup>";
+            var chord = line.substring(idx + 1, endIdx);
+            svLine.text += line.substring(partStartIdx, idx);
+            svLine.chords.push({ name: chord, position: svLine.text.length });
             partStartIdx = endIdx + 1;
         }
-        buf += line.substring(partStartIdx);
+        svLine.text += line.substring(partStartIdx);
+    }
+    return song;
+}
+function parseChordsViewMode(text) {
+    return text == "NoChords" ? ChordsViewMode.NoChords : ChordsViewMode.Inlined;
+}
+function renderLineWithInlinedChords(line) {
+    if (line.chords.length == 0) {
+        return line.text;
+    }
+    var res = "";
+    var idx = 0;
+    for (var i = 0; i < line.chords.length; i++) {
+        var chord = line.chords[i];
+        res += line.text.substring(idx, chord.position);
+        res += "<sup style='color:#2b6e44'>" + chord.name + "</sup>";
+        idx = chord.position;
+    }
+    res += line.text.substring(idx);
+    return res;
+}
+function renderSong(options) {
+    var text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    var chordsViewMode = parseChordsViewMode(options.chordsMode);
+    var showChords = chordsViewMode == ChordsViewMode.Inlined;
+    var song = parseSong(text);
+    var buf = "";
+    for (var ic = 0; ic < song.couplets.length; ic++) {
+        var couplet = song.couplets[ic];
+        for (var il = 0; il < couplet.lines.length; il++) {
+            var line = couplet.lines[il];
+            if (showChords) {
+                buf += renderLineWithInlinedChords(line);
+            }
+            else {
+                buf += line.text;
+            }
+            buf += "\n";
+        }
+        buf += "\n";
     }
     $(options.targetSelector).html(buf);
 }
@@ -562,11 +617,13 @@ exports["default"] = {
 var site_def_1 = require("./api/site-def");
 require("./api/parsley-translations");
 var site_utils_1 = require("./api/site-utils");
+var song_view_1 = require("./api/song-view");
 var tuner_1 = require("./api/tuner");
 site_def_1["default"].Tuner = tuner_1["default"];
 site_def_1["default"].Utils = site_utils_1["default"];
+site_def_1["default"].SongView = song_view_1["default"];
 window.$site = site_def_1["default"];
 
-},{"./api/parsley-translations":2,"./api/site-def":3,"./api/site-utils":4,"./api/tuner":6}],8:[function(require,module,exports){
+},{"./api/parsley-translations":2,"./api/site-def":3,"./api/site-utils":4,"./api/song-view":5,"./api/tuner":6}],8:[function(require,module,exports){
 
 },{}]},{},[7,8]);

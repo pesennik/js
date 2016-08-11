@@ -1,7 +1,6 @@
 import * as $ from "jquery";
 import * as Autolinker from "autolinker";
 import * as Parsley from "parsleyjs";
-import SongView from "./song-view";
 import links from "./links";
 
 function setTitle(selector: string, title: string, root?: HTMLElement): void {
@@ -172,7 +171,7 @@ function scrollToRandomSong() {
     lastIdx = idx;
     const $song = $($songs.get(idx));
     const offset = $song.offset();
-    offset.top -= 20;
+    // offset.top -= 20;
     $("html, body").animate({
         scrollTop: offset.top,
     });
@@ -190,6 +189,5 @@ export default {
     enableScrollTop: enableScrollTop,
     moveCaretToEnd: moveCaretToEnd,
     removeServerSideParsleyError: removeServerSideParsleyError,
-    renderSong: SongView.renderSong,
     scrollToRandomSong: scrollToRandomSong
 }

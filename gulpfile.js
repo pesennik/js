@@ -7,7 +7,7 @@ var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 
 gulp.task("build", function () {
-    browserify(["./src/main.ts", "./typings/tsd.d.ts"])
+    browserify(["./src/site.ts", "./typings/tsd.d.ts"])
         .plugin(tsify)
         .transform(shim)
         .bundle()
