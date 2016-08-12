@@ -21,7 +21,7 @@ interface SVSong {
 
 enum ChordsViewMode {
     Inlined,
-    NoChords,
+    Hidden,
 }
 
 function parseSong(text: string): SVSong {
@@ -59,7 +59,7 @@ function parseSong(text: string): SVSong {
 }
 
 function parseChordsViewMode(text: string): ChordsViewMode {
-    return text == "NoChords" ? ChordsViewMode.NoChords : ChordsViewMode.Inlined;
+    return text == "Hidden" ? ChordsViewMode.Hidden : ChordsViewMode.Inlined;
 }
 
 interface RenderSongOptions {

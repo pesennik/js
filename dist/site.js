@@ -342,7 +342,7 @@ var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefi
 var ChordsViewMode;
 (function (ChordsViewMode) {
     ChordsViewMode[ChordsViewMode["Inlined"] = 0] = "Inlined";
-    ChordsViewMode[ChordsViewMode["NoChords"] = 1] = "NoChords";
+    ChordsViewMode[ChordsViewMode["Hidden"] = 1] = "Hidden";
 })(ChordsViewMode || (ChordsViewMode = {}));
 function parseSong(text) {
     var song = { couplets: [] };
@@ -377,7 +377,7 @@ function parseSong(text) {
     return song;
 }
 function parseChordsViewMode(text) {
-    return text == "NoChords" ? ChordsViewMode.NoChords : ChordsViewMode.Inlined;
+    return text == "Hidden" ? ChordsViewMode.Hidden : ChordsViewMode.Inlined;
 }
 function renderLineWithInlinedChords(line) {
     if (line.chords.length == 0) {
