@@ -299,21 +299,29 @@ function removeServerSideParsleyError(el) {
     var p = $(el).parsley();
     p.removeError("server-side-parsley-error");
 }
-var lastIdx = -1;
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+var randomSongsStack = [];
 function scrollToRandomSong() {
     var $songs = $(".song-block");
-    var nSongs = $songs.length;
-    if (nSongs == 0) {
+    if ($songs.length == 0) {
         return;
     }
-    var idx = -1;
-    do {
-        idx = Math.floor(Math.random() * nSongs);
-    } while (idx == lastIdx && nSongs > 1);
-    lastIdx = idx;
+    if (randomSongsStack.length == 0) {
+        for (var i = 0; i < $songs.length; i++) {
+            randomSongsStack.push(i);
+        }
+        shuffleArray(randomSongsStack);
+    }
+    var idx = randomSongsStack.pop();
     var $song = $($songs.get(idx));
     var offset = $song.offset();
-    // offset.top -= 20;
     $("html, body").animate({
         scrollTop: offset.top
     });

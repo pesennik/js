@@ -157,21 +157,30 @@ function removeServerSideParsleyError(el: HTMLElement) {
     p.removeError("server-side-parsley-error");
 }
 
-let lastIdx = -1;
+function shuffleArray(array: Array<any>): void {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+let randomSongsStack: Array<number> = [];
 function scrollToRandomSong() {
     const $songs = $(".song-block");
-    var nSongs = $songs.length;
-    if (nSongs == 0) {
+    if ($songs.length == 0) {
         return;
     }
-    let idx = -1;
-    do {
-        idx = Math.floor(Math.random() * nSongs);
-    } while (idx == lastIdx && nSongs > 1);
-    lastIdx = idx;
+    if (randomSongsStack.length == 0) {
+        for (let i = 0; i < $songs.length; i++) {
+            randomSongsStack.push(i);
+        }
+        shuffleArray(randomSongsStack);
+    }
+    let idx = randomSongsStack.pop();
     const $song = $($songs.get(idx));
     const offset = $song.offset();
-    // offset.top -= 20;
     $("html, body").animate({
         scrollTop: offset.top,
     });
