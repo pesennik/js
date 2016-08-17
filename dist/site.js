@@ -1,5 +1,20 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
+function set(key, value) {
+    document.cookie = key + '=' + value + ';expires=Fri, 31 Dec 9999 23:59:59 GMT';
+}
+function get(key) {
+    var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+    return keyValue ? keyValue[2] : "{}";
+}
+exports.__esModule = true;
+exports["default"] = {
+    set: set,
+    get: get
+};
+
+},{}],2:[function(require,module,exports){
+"use strict";
 var KnownImageExtensions = {};
 KnownImageExtensions["png"] = true;
 KnownImageExtensions["jpg"] = true;
@@ -113,7 +128,7 @@ exports["default"] = {
     playYoutube: playYoutube
 };
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 if (window.Parsley) {
     window.Parsley.addMessages("ru", {
         defaultMessage: "Некорректное значение.",
@@ -142,7 +157,7 @@ if (window.Parsley) {
     window.Parsley.setLocale("ru");
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 exports["default"] = {
@@ -154,7 +169,7 @@ exports["default"] = {
     SongView: undefined
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 (function (global){
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
@@ -343,15 +358,19 @@ exports["default"] = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./links":1}],5:[function(require,module,exports){
+},{"./links":2}],6:[function(require,module,exports){
 (function (global){
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
+var cookies_1 = require("./cookies");
 var ChordsViewMode;
 (function (ChordsViewMode) {
     ChordsViewMode[ChordsViewMode["Inlined"] = 0] = "Inlined";
     ChordsViewMode[ChordsViewMode["Hidden"] = 1] = "Hidden";
 })(ChordsViewMode || (ChordsViewMode = {}));
+var SONG_VIEW_COOKIE = "song-view";
+var MIN_ZOOM = 50;
+var MAX_ZOOM = 200;
 function parseSong(text) {
     var song = { couplets: [] };
     var couplet = null;
@@ -422,18 +441,49 @@ function renderSong(options) {
         }
         buf += "\n";
     }
-    $(options.targetSelector).html(buf);
+    var s = JSON.parse(cookies_1["default"].get(SONG_VIEW_COOKIE));
+    if (!s.zoom) {
+        s.zoom = 100;
+    }
+    var $song = $(options.targetSelector);
+    $song.html(buf);
+    applyStyles($song);
+}
+function isValidZoom(zoom) {
+    return zoom && zoom >= MIN_ZOOM && zoom <= MAX_ZOOM;
+}
+function applyStyles($song) {
+    var s = JSON.parse(cookies_1["default"].get(SONG_VIEW_COOKIE));
+    var zoom = isValidZoom(s.zoom) ? s.zoom : 100;
+    $song.removeAttr("style");
+    $song.attr("style", "font-size: " + zoom + "%;");
+}
+function zoom(command) {
+    if (!command.delta && !isValidZoom(command.value)) {
+        return;
+    }
+    var s = JSON.parse(cookies_1["default"].get(SONG_VIEW_COOKIE));
+    var currentZoom = isValidZoom(s.zoom) ? s.zoom : 100;
+    s.zoom = command.delta ? currentZoom + command.delta : command.value;
+    if (!isValidZoom(s.zoom)) {
+        return;
+    }
+    cookies_1["default"].set(SONG_VIEW_COOKIE, JSON.stringify(s));
+    applyStyles($(".song-text"));
 }
 exports.__esModule = true;
 exports["default"] = {
-    renderSong: renderSong
+    renderSong: renderSong,
+    zoom: zoom
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],6:[function(require,module,exports){
+},{"./cookies":1}],7:[function(require,module,exports){
 (function (global){
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
+var cookies_1 = require("./cookies");
+var TUNER_COOKIE = "tuner";
 var Tuner = (function () {
     function Tuner(options) {
         var _this = this;
@@ -594,23 +644,16 @@ var Tuner = (function () {
             repeat: this.$repeat.prop("checked")
         };
         var cookieVal = JSON.stringify(state);
-        setCookie("tuner", cookieVal);
+        cookies_1["default"].set(TUNER_COOKIE, cookieVal);
     };
     Tuner.prototype.readLastState = function () {
-        var cookieVal = getCookie("tuner");
+        var cookieVal = cookies_1["default"].get(TUNER_COOKIE);
         var state = JSON.parse(cookieVal);
         this.$repeat.prop("checked", state.repeat == true);
         this.$toneTypeSelector.val(state.tone ? state.tone : "c");
     };
     return Tuner;
 }());
-function setCookie(key, value) {
-    document.cookie = key + '=' + value + ';expires=Fri, 31 Dec 9999 23:59:59 GMT';
-}
-function getCookie(key) {
-    var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
-    return keyValue ? keyValue[2] : "{}";
-}
 function init(options) {
     return new Tuner(options);
 }
@@ -620,7 +663,7 @@ exports["default"] = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],7:[function(require,module,exports){
+},{"./cookies":1}],8:[function(require,module,exports){
 "use strict";
 var site_def_1 = require("./api/site-def");
 require("./api/parsley-translations");
@@ -632,6 +675,6 @@ site_def_1["default"].Utils = site_utils_1["default"];
 site_def_1["default"].SongView = song_view_1["default"];
 window.$site = site_def_1["default"];
 
-},{"./api/parsley-translations":2,"./api/site-def":3,"./api/site-utils":4,"./api/song-view":5,"./api/tuner":6}],8:[function(require,module,exports){
+},{"./api/parsley-translations":3,"./api/site-def":4,"./api/site-utils":5,"./api/song-view":6,"./api/tuner":7}],9:[function(require,module,exports){
 
-},{}]},{},[7,8]);
+},{}]},{},[8,9]);

@@ -1,4 +1,5 @@
 import * as $ from "jquery";
+import Cookies from "./cookies";
 
 // SV (SongView) models
 
@@ -23,6 +24,13 @@ enum ChordsViewMode {
     Inlined,
     Hidden,
 }
+
+const SONG_VIEW_COOKIE = "song-view";
+interface SongViewClientSettings {
+    zoom?: number;
+}
+const MIN_ZOOM = 50;
+const MAX_ZOOM = 200;
 
 function parseSong(text: string): SVSong {
     const song: SVSong = {couplets: []};
@@ -104,9 +112,44 @@ function renderSong(options: RenderSongOptions) {
         }
         buf += "\n";
     }
-    $(options.targetSelector).html(buf);
+
+    var $song = $(options.targetSelector);
+    $song.html(buf);
+    applyStyles($song);
 }
 
+function isValidZoom(zoom?: number): boolean {
+    return zoom && zoom >= MIN_ZOOM && zoom <= MAX_ZOOM;
+}
+
+function applyStyles($song: JQuery) {
+    let s = <SongViewClientSettings> JSON.parse(Cookies.get(SONG_VIEW_COOKIE));
+    let zoom = isValidZoom(s.zoom) ? s.zoom : 100;
+    $song.removeAttr("style");
+    $song.attr("style", "font-size: " + zoom + "%;");
+}
+
+interface ZoomCommand {
+    delta?: number;
+    value?: number;
+}
+
+function zoom(command: ZoomCommand): void {
+    if (!command.delta && !isValidZoom(command.value)) {
+        return;
+    }
+    let s = <SongViewClientSettings> JSON.parse(Cookies.get(SONG_VIEW_COOKIE));
+    let currentZoom = isValidZoom(s.zoom) ? s.zoom : 100;
+    s.zoom = command.delta ? currentZoom + command.delta : command.value;
+    if (!isValidZoom(s.zoom)) {
+        return;
+    }
+    Cookies.set(SONG_VIEW_COOKIE, JSON.stringify(s));
+    applyStyles($(".song-text"))
+}
+
+
 export default {
-    renderSong: renderSong
+    renderSong: renderSong,
+    zoom: zoom,
 }

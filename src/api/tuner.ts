@@ -1,4 +1,5 @@
 import * as $ from "jquery";
+import Cookies from "./cookies";
 
 /**
  * Tuner layout
@@ -8,7 +9,6 @@ import * as $ from "jquery";
  *
  * Tuner sets classes for buttons: tuner-button-off, tuner-button-on
  */
-
 interface TunerOptions {
     selector: string
     tonesPath?: string
@@ -19,6 +19,8 @@ interface ToneButton {
     audio: HTMLAudioElement,
     toneIdx: number
 }
+
+const TUNER_COOKIE = "tuner";
 
 class Tuner {
     private $el: JQuery;
@@ -190,24 +192,15 @@ class Tuner {
             repeat: this.$repeat.prop("checked")
         };
         var cookieVal = JSON.stringify(state);
-        setCookie("tuner", cookieVal);
+        Cookies.set(TUNER_COOKIE, cookieVal);
     }
 
     private readLastState() {
-        let cookieVal = getCookie("tuner");
+        let cookieVal = Cookies.get(TUNER_COOKIE);
         let state = JSON.parse(cookieVal);
         this.$repeat.prop("checked", state.repeat == true);
         this.$toneTypeSelector.val(state.tone ? state.tone : "c");
     }
-}
-
-function setCookie(key: string, value: string) {
-    document.cookie = key + '=' + value + ';expires=Fri, 31 Dec 9999 23:59:59 GMT';
-}
-
-function getCookie(key: string): string {
-    var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
-    return keyValue ? keyValue[2] : "{}";
 }
 
 function init(options: TunerOptions) {
