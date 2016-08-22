@@ -92,6 +92,18 @@ function renderLineWithInlinedChords(line: SVLine): string {
     return res;
 }
 
+const MAX_LINES_PER_COLUMN = 24;
+function applyMultilineModeClass(song: SVSong, $song: JQuery) {
+    let linesInSong = 0;
+    for (let ic = 0; ic < song.couplets.length; ic++) {
+        const couplet = song.couplets[ic];
+        linesInSong += couplet.lines.length;
+    }
+    if (linesInSong > MAX_LINES_PER_COLUMN) {
+        $song.addClass("song-text-2-cols");
+    }
+}
+
 function renderSong(options: RenderSongOptions) {
     const text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     var chordsViewMode = parseChordsViewMode(options.chordsMode);
@@ -112,10 +124,11 @@ function renderSong(options: RenderSongOptions) {
         }
         buf += "\n";
     }
-
     var $song = $(options.targetSelector);
     $song.html(buf);
+    applyMultilineModeClass(song, $song);
     applyStyles($song);
+
 }
 
 function isValidZoom(zoom?: number): boolean {

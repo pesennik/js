@@ -421,6 +421,17 @@ function renderLineWithInlinedChords(line) {
     res += line.text.substring(idx);
     return res;
 }
+var MAX_LINES_PER_COLUMN = 24;
+function applyMultilineModeClass(song, $song) {
+    var linesInSong = 0;
+    for (var ic = 0; ic < song.couplets.length; ic++) {
+        var couplet = song.couplets[ic];
+        linesInSong += couplet.lines.length;
+    }
+    if (linesInSong > MAX_LINES_PER_COLUMN) {
+        $song.addClass("song-text-2-cols");
+    }
+}
 function renderSong(options) {
     var text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     var chordsViewMode = parseChordsViewMode(options.chordsMode);
@@ -441,12 +452,9 @@ function renderSong(options) {
         }
         buf += "\n";
     }
-    var s = JSON.parse(cookies_1["default"].get(SONG_VIEW_COOKIE));
-    if (!s.zoom) {
-        s.zoom = 100;
-    }
     var $song = $(options.targetSelector);
     $song.html(buf);
+    applyMultilineModeClass(song, $song);
     applyStyles($song);
 }
 function isValidZoom(zoom) {
