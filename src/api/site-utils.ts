@@ -198,5 +198,6 @@ export default {
     enableScrollTop: enableScrollTop,
     moveCaretToEnd: moveCaretToEnd,
     removeServerSideParsleyError: removeServerSideParsleyError,
-    scrollToRandomSong: scrollToRandomSong
+    scrollToRandomSong: scrollToRandomSong,
+    playYoutube: links.playYoutube,
 }

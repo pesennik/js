@@ -19,6 +19,10 @@ var KnownImageExtensions = {};
 KnownImageExtensions["png"] = true;
 KnownImageExtensions["jpg"] = true;
 KnownImageExtensions["gif"] = true;
+var KnownAudioExtensions = {};
+KnownAudioExtensions["mp3"] = true;
+KnownAudioExtensions["wav"] = true;
+KnownAudioExtensions["ogg"] = true;
 function playYoutube(el) {
     // Create an iFrame with autoplay set to true
     var iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1";
@@ -31,55 +35,17 @@ function playYoutube(el) {
     // Replace the YouTube thumbnail with YouTube HTML5 Player
     $(el).replaceWith(iframe);
 }
-var youtubeComExtractor = function (urlSuffix) {
-    var captured = /v=([^&]+)/.exec(urlSuffix)[1];
-    return captured ? captured : null;
-};
-youtubeComExtractor.urlPrefix = "youtube.com/watch";
-var youtubeExtractor = function (urlSuffix) {
-    var idx1 = urlSuffix.indexOf("/");
-    if (idx1 < 0) {
-        return urlSuffix;
-    }
-    else if (idx1 > 0) {
-        return urlSuffix.substring(0, idx1);
-    }
-    urlSuffix = urlSuffix.substr(1);
-    var idx2 = urlSuffix.indexOf("/");
-    if (idx2 < 0) {
-        return urlSuffix;
-    }
-    return urlSuffix.substr(0, idx2);
-};
-youtubeExtractor.urlPrefix = "youtu.be";
-var YOUTUBE_VIDEO_ID_EXTRACTORS = [youtubeComExtractor, youtubeExtractor];
-function findYoutubeVideoIdExtractor(url) {
-    if (!url || url.length == 0) {
-        return null;
-    }
-    if (url.indexOf("www.") == 0) {
-        url = url.substring(4);
-    }
-    url = url.toLocaleLowerCase();
-    for (var i = 0; i < YOUTUBE_VIDEO_ID_EXTRACTORS.length; i++) {
-        var e = YOUTUBE_VIDEO_ID_EXTRACTORS[i];
-        if (url.indexOf(e.urlPrefix) == 0) {
-            return e;
-        }
-    }
-    return null;
+function getYoutubeVideoId(url) {
+    var p = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
+    return (url.match(p)) ? RegExp.$1 : null;
 }
 function replaceWithYoutubeEmbed(url, fallback) {
-    var e = findYoutubeVideoIdExtractor(url);
-    if (e == null) {
-        return null;
-    }
-    var videoId = e(url.substr(e.urlPrefix.length));
+    var videoId = getYoutubeVideoId(url);
     if (!videoId) {
         return fallback;
     }
     var style = "background-image: url(https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg);";
-    return "<div id='" + videoId + "' class='youtube' style='" + style + "' onclick='$site.Utils.playYoutube(this);'>" + "<div class='play'></div></div>";
+    return "<div id='" + videoId + "' class='youtube' style='" + style + "' onclick='$site.Utils.playYoutube(this);'><div class='play'></div></div>";
 }
 function getLinkReplacement(link) {
     var lcLink = link.toLocaleLowerCase();
@@ -95,7 +61,10 @@ function getLinkReplacement(link) {
     if (ext in KnownImageExtensions) {
         return "<a href='" + link + "' target='_blank'><img src='" + link + "' style='max-width: 400px; max-height: 300px;'></a>";
     }
-    if (findYoutubeVideoIdExtractor(url) != null) {
+    if (ext in KnownAudioExtensions) {
+        return "<audio controls><source src='" + link + "'></audio>";
+    }
+    if (getYoutubeVideoId(url) != null) {
         return replaceWithYoutubeEmbed(url, null);
     }
     return null;
@@ -354,7 +323,8 @@ exports["default"] = {
     enableScrollTop: enableScrollTop,
     moveCaretToEnd: moveCaretToEnd,
     removeServerSideParsleyError: removeServerSideParsleyError,
-    scrollToRandomSong: scrollToRandomSong
+    scrollToRandomSong: scrollToRandomSong,
+    playYoutube: links_1["default"].playYoutube
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})

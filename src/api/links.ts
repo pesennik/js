@@ -3,7 +3,12 @@ KnownImageExtensions["png"] = true;
 KnownImageExtensions["jpg"] = true;
 KnownImageExtensions["gif"] = true;
 
-function playYoutube(el:HTMLElement) {
+var KnownAudioExtensions = {};
+KnownAudioExtensions["mp3"] = true;
+KnownAudioExtensions["wav"] = true;
+KnownAudioExtensions["ogg"] = true;
+
+function playYoutube(el: HTMLElement) {
     // Create an iFrame with autoplay set to true
     var iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1";
     if ($(el).data('params')) {
@@ -18,64 +23,21 @@ function playYoutube(el:HTMLElement) {
     $(el).replaceWith(iframe);
 }
 
-interface YoutubeVideoIdExtractor {
-    urlPrefix:string;
-    (urlSuffix:string):string;
-}
-var youtubeComExtractor = <YoutubeVideoIdExtractor> function (urlSuffix:string) {
-    var captured = /v=([^&]+)/.exec(urlSuffix)[1];
-    return captured ? captured : null;
-};
-youtubeComExtractor.urlPrefix = "youtube.com/watch";
-
-var youtubeExtractor = <YoutubeVideoIdExtractor> function (urlSuffix:string) {
-    var idx1 = urlSuffix.indexOf("/");
-    if (idx1 < 0) {
-        return urlSuffix;
-    } else if (idx1 > 0) {
-        return urlSuffix.substring(0, idx1);
-    }
-    urlSuffix = urlSuffix.substr(1);
-    var idx2 = urlSuffix.indexOf("/");
-    if (idx2 < 0) {
-        return urlSuffix;
-    }
-    return urlSuffix.substr(0, idx2);
-};
-youtubeExtractor.urlPrefix = "youtu.be";
-var YOUTUBE_VIDEO_ID_EXTRACTORS:Array<YoutubeVideoIdExtractor> = [youtubeComExtractor, youtubeExtractor];
-
-function findYoutubeVideoIdExtractor(url:string):YoutubeVideoIdExtractor {
-    if (!url || url.length == 0) {
-        return null;
-    }
-    if (url.indexOf("www.") == 0) {
-        url = url.substring(4);
-    }
-    url = url.toLocaleLowerCase();
-    for (var i = 0; i < YOUTUBE_VIDEO_ID_EXTRACTORS.length; i++) {
-        var e = YOUTUBE_VIDEO_ID_EXTRACTORS[i];
-        if (url.indexOf(e.urlPrefix) == 0) {
-            return e;
-        }
-    }
-    return null;
+function getYoutubeVideoId(url: string): string {
+    var p = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
+    return (url.match(p)) ? RegExp.$1 : null;
 }
 
-function replaceWithYoutubeEmbed(url:string, fallback:string) {
-    var e = findYoutubeVideoIdExtractor(url);
-    if (e == null) {
-        return null;
-    }
-    var videoId = e(url.substr(e.urlPrefix.length));
+function replaceWithYoutubeEmbed(url: string, fallback: string) {
+    var videoId = getYoutubeVideoId(url);
     if (!videoId) {
         return fallback;
     }
     var style = "background-image: url(https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg);";
-    return "<div id='" + videoId + "' class='youtube' style='" + style + "' onclick='$site.Utils.playYoutube(this);'>" + "<div class='play'></div></div>";
+    return `<div id='${videoId}' class='youtube' style='${style}' onclick='$site.Utils.playYoutube(this);'><div class='play'></div></div>`;
 }
 
-function getLinkReplacement(link:string):string {
+function getLinkReplacement(link: string): string {
     var lcLink = link.toLocaleLowerCase();
     var url = link;
     if (lcLink.indexOf("http://") == 0) {
@@ -86,15 +48,18 @@ function getLinkReplacement(link:string):string {
     var lcUrl = url.toLocaleLowerCase();
     var ext = lcUrl.split('.').pop();
     if (ext in KnownImageExtensions) {
-        return "<a href='" + link + "' target='_blank'><img src='" + link + "' style='max-width: 400px; max-height: 300px;'></a>"
+        return `<a href='${link}' target='_blank'><img src='${link}' style='max-width: 400px; max-height: 300px;'></a>`
     }
-    if (findYoutubeVideoIdExtractor(url) != null) {
+    if (ext in KnownAudioExtensions) {
+        return `<audio controls><source src='${link}'></audio>`
+    }
+    if (getYoutubeVideoId(url) != null) {
         return replaceWithYoutubeEmbed(url, null);
     }
     return null;
 }
 
-function processMediaLinks(text:string):string {
+function processMediaLinks(text: string): string {
     var res = text;
     var startIdx = res.indexOf("<a href=");
     while (startIdx >= 0) {
