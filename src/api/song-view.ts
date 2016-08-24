@@ -76,6 +76,14 @@ interface RenderSongOptions {
     chordsMode: string;
 }
 
+const validNotes = {
+    'A': true, 'B': true, 'C': true, 'D': true, 'E': true, 'F': true, 'G': true, 'H': true,
+    'a': true, 'b': true, 'c': true, 'd': true, 'e': true, 'f': true, 'g': true, 'h': true,
+};
+
+function isValidChordName(chord: string) {
+    return chord && chord.length > 0 && chord.length <= 7 && validNotes[chord.charAt(0)];
+}
 function renderLineWithInlinedChords(line: SVLine): string {
     if (line.chords.length == 0) {
         return line.text;
@@ -85,7 +93,10 @@ function renderLineWithInlinedChords(line: SVLine): string {
     for (let i = 0; i < line.chords.length; i++) {
         let chord = line.chords[i];
         res += line.text.substring(idx, chord.position);
-        res += `<sup style='color:#2b6e44'>${chord.name}</sup>`;
+        var validChord = isValidChordName(chord.name);
+        const color = validChord ? "#2b6e44" : "blue";
+        const title = validChord ? "" : "title='Неподдерживаемый тип аккорда: аккорд не будет транспонироваться.'";
+        res += `<sup style='color:${color};' ${title}>${chord.name}</sup>`;
         idx = chord.position;
     }
     res += line.text.substring(idx);
