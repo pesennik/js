@@ -64,6 +64,9 @@ class Tuner {
         this.$repeat.change(()=> this.saveState());
 
         $(document).keydown((e: KeyboardEvent) => {
+            if (!this.$el.is(":visible")) { // tuner is not visible, do not process keyboard events
+                return;
+            }
             if (e.which >= 49 && e.which <= 54) { // 1,2,3,4,5,6
                 this.$el.find(".tuner-button-s" + String.fromCharCode(e.which)).click();
             } else if (e.which == 37 || e.which == 90 || e.which == 122) { // left arrow or Z
@@ -104,7 +107,7 @@ class Tuner {
         });
 
         b.audio.addEventListener("ended", () => {
-            if (self.$repeat.is(":checked") && !self.stopped) {
+            if (self.$repeat.is(":checked") && !self.stopped && self.$el.is(":visible")) {
                 self.play(b);
                 return;
             }

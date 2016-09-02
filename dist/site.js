@@ -512,6 +512,9 @@ var Tuner = (function () {
         this.$toneTypeSelector.change(function () { return _this.updateActiveTone(); });
         this.$repeat.change(function () { return _this.saveState(); });
         $(document).keydown(function (e) {
+            if (!_this.$el.is(":visible")) {
+                return;
+            }
             if (e.which >= 49 && e.which <= 54) {
                 _this.$el.find(".tuner-button-s" + String.fromCharCode(e.which)).click();
             }
@@ -552,7 +555,7 @@ var Tuner = (function () {
             Tuner.updateButtonUI(b);
         });
         b.audio.addEventListener("ended", function () {
-            if (self.$repeat.is(":checked") && !self.stopped) {
+            if (self.$repeat.is(":checked") && !self.stopped && self.$el.is(":visible")) {
                 self.play(b);
                 return;
             }
