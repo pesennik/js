@@ -338,6 +338,11 @@ var ChordsViewMode;
     ChordsViewMode[ChordsViewMode["Inlined"] = 0] = "Inlined";
     ChordsViewMode[ChordsViewMode["Hidden"] = 1] = "Hidden";
 })(ChordsViewMode || (ChordsViewMode = {}));
+var TextViewMode;
+(function (TextViewMode) {
+    TextViewMode[TextViewMode["Visible"] = 0] = "Visible";
+    TextViewMode[TextViewMode["Hidden"] = 1] = "Hidden";
+})(TextViewMode || (TextViewMode = {}));
 var SONG_VIEW_COOKIE = "song-view";
 var MIN_ZOOM = 50;
 var MAX_ZOOM = 200;
@@ -372,9 +377,6 @@ function parseSong(text) {
         svLine.text += line.substring(partStartIdx);
     }
     return song;
-}
-function parseChordsViewMode(text) {
-    return text == "Hidden" ? ChordsViewMode.Hidden : ChordsViewMode.Inlined;
 }
 var validNotes = {
     'A': true, 'B': true, 'C': true, 'D': true, 'E': true, 'F': true, 'G': true, 'H': true,
@@ -413,8 +415,14 @@ function applyMultilineModeClass(song, $song) {
     }
 }
 function renderSong(options) {
+    var $song = $(options.targetSelector);
+    var textViewMode = !options.textViewMode || options.textViewMode == "Hidden" ? TextViewMode.Hidden : TextViewMode.Visible;
+    if (textViewMode == TextViewMode.Hidden) {
+        $song.html("");
+        return;
+    }
     var text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    var chordsViewMode = parseChordsViewMode(options.chordsMode);
+    var chordsViewMode = !options.chordsMode || options.chordsMode == "Hidden" ? ChordsViewMode.Hidden : ChordsViewMode.Inlined;
     var showChords = chordsViewMode == ChordsViewMode.Inlined;
     var song = parseSong(text);
     var buf = "";
@@ -432,7 +440,6 @@ function renderSong(options) {
         }
         buf += "\n";
     }
-    var $song = $(options.targetSelector);
     $song.html(buf);
     applyMultilineModeClass(song, $song);
     applyStyles($song);
@@ -461,6 +468,8 @@ function zoom(command) {
 }
 exports.__esModule = true;
 exports["default"] = {
+    TextViewMode: TextViewMode,
+    ChordsViewMode: ChordsViewMode,
     renderSong: renderSong,
     zoom: zoom
 };
