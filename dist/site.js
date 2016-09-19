@@ -310,6 +310,13 @@ function scrollToRandomSong() {
         scrollTop: offset.top
     });
 }
+function scrollToBlock(selector) {
+    var $block = $(selector);
+    var offset = $block.offset();
+    $("html, body").animate({
+        scrollTop: offset.top
+    });
+}
 exports.__esModule = true;
 exports["default"] = {
     setTitle: setTitle,
@@ -324,6 +331,7 @@ exports["default"] = {
     moveCaretToEnd: moveCaretToEnd,
     removeServerSideParsleyError: removeServerSideParsleyError,
     scrollToRandomSong: scrollToRandomSong,
+    scrollToBlock: scrollToBlock,
     playYoutube: links_1["default"].playYoutube
 };
 

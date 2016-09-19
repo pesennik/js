@@ -186,6 +186,14 @@ function scrollToRandomSong() {
     });
 }
 
+function scrollToBlock(selector: string) {
+    const $block = $(selector);
+    const offset = $block.offset();
+    $("html, body").animate({
+        scrollTop: offset.top,
+    });
+}
+
 export default {
     setTitle: setTitle,
     linkify: linkify,
@@ -199,5 +207,6 @@ export default {
     moveCaretToEnd: moveCaretToEnd,
     removeServerSideParsleyError: removeServerSideParsleyError,
     scrollToRandomSong: scrollToRandomSong,
+    scrollToBlock: scrollToBlock,
     playYoutube: links.playYoutube,
 }
