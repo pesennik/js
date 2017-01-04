@@ -161,7 +161,6 @@ function linkify(text, options) {
         },
         email: true,
         phone: true,
-        twitter: false,
         hashtag: false,
         stripPrefix: true,
         newWindow: true,
@@ -268,17 +267,6 @@ function enableScrollTop() {
         });
     });
 }
-function moveCaretToEnd(el) {
-    if (typeof el.selectionStart === "number") {
-        el.selectionStart = el.selectionEnd = el.value.length;
-    }
-    else if (typeof el.createTextRange !== "undefined") {
-        el.focus();
-        var range = el.createTextRange();
-        range.collapse(false);
-        range.select();
-    }
-}
 function removeServerSideParsleyError(el) {
     var p = $(el).parsley();
     p.removeError("server-side-parsley-error");
@@ -328,7 +316,6 @@ exports["default"] = {
     getURLParameter: getURLParameter,
     limitTextArea: limitTextArea,
     enableScrollTop: enableScrollTop,
-    moveCaretToEnd: moveCaretToEnd,
     removeServerSideParsleyError: removeServerSideParsleyError,
     scrollToRandomSong: scrollToRandomSong,
     scrollToBlock: scrollToBlock,
@@ -523,8 +510,7 @@ var Tuner = (function () {
         var this_1 = this;
         var $b;
         for (var toneIdx = 1; toneIdx <= 6; toneIdx++) {
-            var state_1 = _loop_1(toneIdx);
-            if (state_1 === "continue") continue;
+            _loop_1(toneIdx);
         }
         this.$toneTypeSelector.change(function () { return _this.updateActiveTone(); });
         this.$repeat.change(function () { return _this.saveState(); });

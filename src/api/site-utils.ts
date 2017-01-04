@@ -25,7 +25,6 @@ function linkify(text: string, options: LinkifyOptions): string {
         },
         email: true,
         phone: true,
-        twitter: false,
         hashtag: false,
 
         stripPrefix: true,
@@ -141,17 +140,6 @@ function enableScrollTop(): void {
     });
 }
 
-function moveCaretToEnd(el: HTMLTextAreaElement): void {
-    if (typeof el.selectionStart === "number") {
-        el.selectionStart = el.selectionEnd = el.value.length;
-    } else if (typeof el.createTextRange !== "undefined") {
-        el.focus();
-        const range = el.createTextRange();
-        range.collapse(false);
-        range.select();
-    }
-}
-
 function removeServerSideParsleyError(el: HTMLElement) {
     var p: Parsley = $(el).parsley();
     p.removeError("server-side-parsley-error");
@@ -204,7 +192,6 @@ export default {
     getURLParameter: getURLParameter,
     limitTextArea: limitTextArea,
     enableScrollTop: enableScrollTop,
-    moveCaretToEnd: moveCaretToEnd,
     removeServerSideParsleyError: removeServerSideParsleyError,
     scrollToRandomSong: scrollToRandomSong,
     scrollToBlock: scrollToBlock,
