@@ -2,6 +2,7 @@ import * as $ from "jquery";
 import * as Autolinker from "autolinker";
 import * as Parsley from "parsleyjs";
 import links from "./links";
+import sidebar from "./sidebar";
 
 function setTitle(selector: string, title: string, root?: HTMLElement): void {
     root = root ? root : window.document.body;
@@ -196,4 +197,5 @@ export default {
     scrollToRandomSong: scrollToRandomSong,
     scrollToBlock: scrollToBlock,
     playYoutube: links.playYoutube,
+    initSidebar: sidebar.initSidebar
 }
