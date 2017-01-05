@@ -128,6 +128,53 @@ if (window.Parsley) {
 
 },{}],4:[function(require,module,exports){
 "use strict";
+function getSidebarFreeSpace() {
+    var $el = $("#sidebar-wrapper").find("li").last();
+    var sidebarBottom = $el.offset().top + $el.height();
+    return $(window).height() - sidebarBottom;
+}
+function adjustSidebarToWindowSize() {
+    var $sidebar = $("#sidebar-wrapper");
+    var $images = $sidebar.find("img");
+    var $spacers = $sidebar.find(".sidebar-spacer");
+    var $menuText = $sidebar.find(".sidebar-menu-text");
+    function imagesAreBig() {
+        return $images.height() >= 50;
+    }
+    // show until fit
+    if (!imagesAreBig() && getSidebarFreeSpace() >= $images.length * 20) {
+        $images.height(50);
+        $images.width(50);
+    }
+    if (!$menuText.is(":visible") && imagesAreBig() && getSidebarFreeSpace() >= 100) {
+        $menuText.show();
+    }
+    if (!$spacers.is(":visible") && $menuText.is(":visible") && getSidebarFreeSpace() >= 150) {
+        $spacers.show();
+    }
+    // hide until does not fit
+    if ($spacers.is(":visible") && getSidebarFreeSpace() < 0) {
+        $spacers.hide();
+    }
+    if ($menuText.is(":visible") && getSidebarFreeSpace() < 0) {
+        $menuText.hide();
+    }
+    if (imagesAreBig() && getSidebarFreeSpace() < 0) {
+        $images.height(30);
+        $images.width(30);
+    }
+}
+function initSidebar() {
+    $(document).ready(adjustSidebarToWindowSize);
+    $(window).resize(adjustSidebarToWindowSize);
+}
+exports.__esModule = true;
+exports["default"] = {
+    initSidebar: initSidebar
+};
+
+},{}],5:[function(require,module,exports){
+"use strict";
 exports.__esModule = true;
 exports["default"] = {
     /** Guitar Tuner API */
@@ -138,12 +185,13 @@ exports["default"] = {
     SongView: undefined
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (global){
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
 var Autolinker = (typeof window !== "undefined" ? window['Autolinker'] : typeof global !== "undefined" ? global['Autolinker'] : null);
 var links_1 = require("./links");
+var sidebar_1 = require("./sidebar");
 function setTitle(selector, title, root) {
     root = root ? root : window.document.body;
     $(root).find(selector).each(function () {
@@ -319,11 +367,12 @@ exports["default"] = {
     removeServerSideParsleyError: removeServerSideParsleyError,
     scrollToRandomSong: scrollToRandomSong,
     scrollToBlock: scrollToBlock,
-    playYoutube: links_1["default"].playYoutube
+    playYoutube: links_1["default"].playYoutube,
+    initSidebar: sidebar_1["default"].initSidebar
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./links":2}],6:[function(require,module,exports){
+},{"./links":2,"./sidebar":4}],7:[function(require,module,exports){
 (function (global){
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
@@ -470,7 +519,7 @@ exports["default"] = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./cookies":1}],7:[function(require,module,exports){
+},{"./cookies":1}],8:[function(require,module,exports){
 (function (global){
 "use strict";
 var $ = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
@@ -487,7 +536,7 @@ var Tuner = (function () {
         this.readLastState();
         var toneType = this.$toneTypeSelector.val();
         this.tonesPath = options.tonesPath ? options.tonesPath : "/tones";
-        var _loop_1 = function(toneIdx) {
+        var _loop_1 = function (toneIdx) {
             $b = this_1.$el.find(".tuner-button-s" + toneIdx);
             if ($b.length <= 0) {
                 return "continue";
@@ -507,8 +556,7 @@ var Tuner = (function () {
             Tuner.updateButtonUI(b);
             this_1.lastPlayed = this_1.lastPlayed ? this_1.lastPlayed : b;
         };
-        var this_1 = this;
-        var $b;
+        var this_1 = this, $b;
         for (var toneIdx = 1; toneIdx <= 6; toneIdx++) {
             _loop_1(toneIdx);
         }
@@ -657,7 +705,7 @@ exports["default"] = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./cookies":1}],8:[function(require,module,exports){
+},{"./cookies":1}],9:[function(require,module,exports){
 "use strict";
 var site_def_1 = require("./api/site-def");
 require("./api/parsley-translations");
@@ -669,6 +717,6 @@ site_def_1["default"].Utils = site_utils_1["default"];
 site_def_1["default"].SongView = song_view_1["default"];
 window.$site = site_def_1["default"];
 
-},{"./api/parsley-translations":3,"./api/site-def":4,"./api/site-utils":5,"./api/song-view":6,"./api/tuner":7}],9:[function(require,module,exports){
+},{"./api/parsley-translations":3,"./api/site-def":5,"./api/site-utils":6,"./api/song-view":7,"./api/tuner":8}],10:[function(require,module,exports){
 
-},{}]},{},[8,9]);
+},{}]},{},[9,10]);
