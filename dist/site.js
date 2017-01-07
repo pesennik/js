@@ -405,11 +405,23 @@
 	    var lastElementBottom = $el.offset().top + $el.height();
 	    return $sidebar.offset().top + $sidebar.height() - lastElementBottom;
 	}
+	var forceShowMenu = false;
 	function adjustSidebarToWindowSize() {
 	    var $sidebar = $("#sidebar");
+	    var $sidebarToggle = $("#sidebar-toggle");
 	    var $images = $sidebar.find("img");
 	    var $spacers = $sidebar.find(".sidebar-spacer");
 	    var $menuText = $sidebar.find(".sidebar-menu-text");
+	    var $contentBlock = $("#content-block");
+	    if (window.innerWidth < 800 && !forceShowMenu) {
+	        $sidebar.hide();
+	        $sidebarToggle.show();
+	        $contentBlock.css("padding-left", 0);
+	        return;
+	    }
+	    $sidebarToggle.hide();
+	    $sidebar.show();
+	    $contentBlock.css("padding-left", $sidebar.css("width"));
 	    function imagesAreBig() {
 	        return $images.height() >= 50;
 	    }
@@ -418,7 +430,7 @@
 	        $images.height(50);
 	        $images.width(50);
 	        $sidebar.css("width", 80);
-	        $("#content-block").css("padding-left", 80);
+	        $contentBlock.css("padding-left", 80);
 	    }
 	    if (!$menuText.is(":visible") && imagesAreBig() && getSidebarFreeSpace() >= 100) {
 	        $menuText.show();
@@ -439,12 +451,24 @@
 	        $images.height(30);
 	        $images.width(30);
 	        $sidebar.css("width", 50);
-	        $("#content-block").css("padding-left", 50);
+	        $contentBlock.css("padding-left", 50);
 	    }
 	}
 	function initSidebar() {
 	    $(document).ready(adjustSidebarToWindowSize);
 	    $(window).resize(adjustSidebarToWindowSize);
+	    $("#sidebar-toggle").click(function (e) {
+	        forceShowMenu = true;
+	        adjustSidebarToWindowSize();
+	        e.originalEvent["forceShowMenuClick"] = true;
+	    });
+	    document.body.onclick = function (e) {
+	        if (forceShowMenu && !e["forceShowMenuClick"]) {
+	            forceShowMenu = false;
+	            adjustSidebarToWindowSize();
+	        }
+	        return true;
+	    };
 	}
 	exports.__esModule = true;
 	exports["default"] = {
