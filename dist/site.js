@@ -414,13 +414,13 @@
 	    var $menuText = $sidebar.find(".sidebar-menu-text");
 	    var $contentBlock = $("#content-block");
 	    if (window.innerWidth < 800 && !forceShowMenu) {
-	        $sidebar.hide();
-	        $sidebarToggle.show();
+	        $sidebar.fadeOut(1000);
+	        $sidebarToggle.fadeIn();
 	        $contentBlock.css("padding-left", 0);
 	        return;
 	    }
-	    $sidebarToggle.hide();
-	    $sidebar.show();
+	    $sidebar.fadeIn();
+	    $sidebarToggle.fadeOut();
 	    $contentBlock.css("padding-left", $sidebar.css("width"));
 	    function imagesAreBig() {
 	        return $images.height() >= 50;
@@ -462,13 +462,14 @@
 	        adjustSidebarToWindowSize();
 	        e.originalEvent["forceShowMenuClick"] = true;
 	    });
-	    document.body.onclick = function (e) {
+	    function handleTouchAndClick(e) {
 	        if (forceShowMenu && !e["forceShowMenuClick"]) {
 	            forceShowMenu = false;
 	            adjustSidebarToWindowSize();
 	        }
-	        return true;
-	    };
+	    }
+	    document.body.addEventListener("click", handleTouchAndClick);
+	    document.body.addEventListener("touchmove", handleTouchAndClick);
 	}
 	exports.__esModule = true;
 	exports["default"] = {

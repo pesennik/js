@@ -1,7 +1,7 @@
 function getSidebarFreeSpace(): number {
     let $sidebar = $("#sidebar");
     let $el = $sidebar.find("li").last();
-    var lastElementBottom = $el.offset().top + $el.height();
+    let lastElementBottom = $el.offset().top + $el.height();
     return $sidebar.offset().top + $sidebar.height() - lastElementBottom;
 }
 
@@ -15,13 +15,13 @@ function adjustSidebarToWindowSize() {
     let $contentBlock = $("#content-block");
 
     if (window.innerWidth < 800 && !forceShowMenu) {
-        $sidebar.hide();
-        $sidebarToggle.show();
+        $sidebar.fadeOut(700);
+        $sidebarToggle.fadeIn();
         $contentBlock.css("padding-left", 0);
         return;
     }
-    $sidebarToggle.hide();
-    $sidebar.show();
+    $sidebar.fadeIn();
+    $sidebarToggle.fadeOut();
     $contentBlock.css("padding-left", $sidebar.css("width"));
 
     function imagesAreBig() {
@@ -69,14 +69,15 @@ function initSidebar() {
         e.originalEvent["forceShowMenuClick"] = true;
     });
 
-    document.body.onclick = function (e) {
+    function handleTouchAndClick(e) {
         if (forceShowMenu && !e["forceShowMenuClick"]) {
             forceShowMenu = false;
             adjustSidebarToWindowSize();
         }
-        return true;
-    };
+    }
 
+    document.body.addEventListener("click", handleTouchAndClick);
+    document.body.addEventListener("touchmove", handleTouchAndClick);
 }
 
 export default {
