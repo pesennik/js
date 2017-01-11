@@ -414,7 +414,7 @@
 	    var $menuText = $sidebar.find(".sidebar-menu-text");
 	    var $contentBlock = $("#content-block");
 	    if (window.innerWidth < 800 && !forceShowMenu) {
-	        $sidebar.fadeOut(1000);
+	        $sidebar.fadeOut(700);
 	        $sidebarToggle.fadeIn();
 	        $contentBlock.css("padding-left", 0);
 	        return;
