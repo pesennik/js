@@ -603,6 +603,7 @@
 	    var zoom = isValidZoom(s.zoom) ? s.zoom : 100;
 	    $song.removeAttr("style");
 	    $song.attr("style", "font-size: " + zoom + "%;");
+	    $song.removeClass("song-text-loading");
 	}
 	function zoom(command) {
 	    if (!command.delta && !isValidZoom(command.value)) {

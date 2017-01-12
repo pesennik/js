@@ -90,12 +90,12 @@ function renderLineWithInlinedChords(line: SVLine): string {
     if (line.chords.length == 0) {
         return line.text;
     }
-    var res = "";
+    let res = "";
     let idx = 0;
     for (let i = 0; i < line.chords.length; i++) {
         let chord = line.chords[i];
         res += line.text.substring(idx, chord.position);
-        var validChord = isValidChordName(chord.name);
+        const validChord = isValidChordName(chord.name);
         const color = validChord ? "#2b6e44" : "blue";
         const title = validChord ? "" : "title='Неподдерживаемый тип аккорда: аккорд не будет транспонироваться.'";
         res += `<sup style='color:${color};' ${title}>${chord.name}</sup>`;
@@ -118,14 +118,14 @@ function applyMultilineModeClass(song: SVSong, $song: JQuery) {
 }
 
 function renderSong(options: RenderSongOptions) {
-    var $song = $(options.targetSelector);
-    var textViewMode = !options.textViewMode || options.textViewMode == "Hidden" ? TextViewMode.Hidden : TextViewMode.Visible;
+    const $song = $(options.targetSelector);
+    const textViewMode = !options.textViewMode || options.textViewMode == "Hidden" ? TextViewMode.Hidden : TextViewMode.Visible;
     if (textViewMode == TextViewMode.Hidden) {
         $song.html("");
         return;
     }
     const text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    var chordsViewMode = !options.chordsMode || options.chordsMode == "Hidden" ? ChordsViewMode.Hidden : ChordsViewMode.Inlined;
+    const chordsViewMode = !options.chordsMode || options.chordsMode == "Hidden" ? ChordsViewMode.Hidden : ChordsViewMode.Inlined;
     const showChords = chordsViewMode == ChordsViewMode.Inlined;
     const song = parseSong(text);
     let buf = "";
@@ -158,6 +158,7 @@ function applyStyles($song: JQuery) {
     let zoom = isValidZoom(s.zoom) ? s.zoom : 100;
     $song.removeAttr("style");
     $song.attr("style", "font-size: " + zoom + "%;");
+    $song.removeClass("song-text-loading");
 }
 
 interface ZoomCommand {
