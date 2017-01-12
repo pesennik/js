@@ -9,7 +9,7 @@
     "url": "https://github.com/pessennik/js.git"
   },
   "devDependencies": {
-    "typescript": "2.1.4",
+    "typescript": "2.1.5",
     "tsify": "3.0.0",
     "tslint": "4.3.1"
   },
