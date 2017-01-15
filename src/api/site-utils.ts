@@ -175,7 +175,7 @@ function scrollToRandomSong() {
     });
 }
 
-function scrollToBlock(selector: string) {
+function scrollToBlock(selector: string): void {
     const $block = $(selector);
     const offset = $block.offset();
     $("html, body").animate({

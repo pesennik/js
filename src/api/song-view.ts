@@ -117,7 +117,7 @@ function applyMultilineModeClass(song: SVSong, $song: JQuery) {
     }
 }
 
-function renderSong(options: RenderSongOptions) {
+function renderSong(options: RenderSongOptions): void {
     const $song = $(options.targetSelector);
     const textViewMode = !options.textViewMode || options.textViewMode == "Hidden" ? TextViewMode.Hidden : TextViewMode.Visible;
     if (textViewMode == TextViewMode.Hidden) {
@@ -146,7 +146,6 @@ function renderSong(options: RenderSongOptions) {
     $song.html(buf);
     applyMultilineModeClass(song, $song);
     applyStyles($song);
-
 }
 
 function isValidZoom(zoom?: number): boolean {
