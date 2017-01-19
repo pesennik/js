@@ -329,6 +329,7 @@
 	    var iframe = $('<iframe/>', { 'frameborder': '0', 'src': iframeUrl, 'width': $(el).width(), 'height': $(el).height() });
 	    iframe.attr("allowfullscreen", "allowfullscreen");
 	    // Replace the YouTube thumbnail with YouTube HTML5 Player
+	    $(el).parent().css("paddingTop", 0);
 	    $(el).replaceWith(iframe);
 	}
 	function getYoutubeVideoId(url) {
@@ -341,7 +342,7 @@
 	        return fallback;
 	    }
 	    var style = "background-image: url(https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg);";
-	    return "<div id='" + videoId + "' class='youtube' style='" + style + "' onclick='$site.Utils.playYoutube(this);'><div class='play'></div></div>";
+	    return "<div class=\"youtube-aspect-ratio\"><div id='" + videoId + "' class='youtube' style='" + style + "' onclick='$site.Utils.playYoutube(this);'><div class='play'></div></div></div>";
 	}
 	function getLinkReplacement(link) {
 	    var lcLink = link.toLocaleLowerCase();

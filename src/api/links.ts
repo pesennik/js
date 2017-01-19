@@ -1,52 +1,53 @@
-var KnownImageExtensions = {};
+const KnownImageExtensions = {};
 KnownImageExtensions["png"] = true;
 KnownImageExtensions["jpg"] = true;
 KnownImageExtensions["gif"] = true;
 
-var KnownAudioExtensions = {};
+const KnownAudioExtensions = {};
 KnownAudioExtensions["mp3"] = true;
 KnownAudioExtensions["wav"] = true;
 KnownAudioExtensions["ogg"] = true;
 
 function playYoutube(el: HTMLElement) {
     // Create an iFrame with autoplay set to true
-    var iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1";
+    let iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1";
     if ($(el).data('params')) {
         iframeUrl += '&' + $(this).data('params')
     }
 
     // The height and width of the iFrame should be the same as parent
-    var iframe = $('<iframe/>', {'frameborder': '0', 'src': iframeUrl, 'width': $(el).width(), 'height': $(el).height()});
+    const iframe = $('<iframe/>', {'frameborder': '0', 'src': iframeUrl, 'width': $(el).width(), 'height': $(el).height()});
     iframe.attr("allowfullscreen", "allowfullscreen");
 
     // Replace the YouTube thumbnail with YouTube HTML5 Player
+    $(el).parent().css("paddingTop", 0);
     $(el).replaceWith(iframe);
 }
 
 function getYoutubeVideoId(url: string): string {
-    var p = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
+    const p = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
     return (url.match(p)) ? RegExp.$1 : null;
 }
 
 function replaceWithYoutubeEmbed(url: string, fallback: string) {
-    var videoId = getYoutubeVideoId(url);
+    let videoId = getYoutubeVideoId(url);
     if (!videoId) {
         return fallback;
     }
-    var style = "background-image: url(https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg);";
-    return `<div id='${videoId}' class='youtube' style='${style}' onclick='$site.Utils.playYoutube(this);'><div class='play'></div></div>`;
+    const style = "background-image: url(https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg);";
+    return `<div class="youtube-aspect-ratio"><div id='${videoId}' class='youtube' style='${style}' onclick='$site.Utils.playYoutube(this);'><div class='play'></div></div></div>`;
 }
 
 function getLinkReplacement(link: string): string {
-    var lcLink = link.toLocaleLowerCase();
-    var url = link;
+    const lcLink = link.toLocaleLowerCase();
+    let url = link;
     if (lcLink.indexOf("http://") == 0) {
         url = link.substr(7);
     } else if (lcLink.indexOf("https://") == 0) {
         url = link.substr(8);
     }
-    var lcUrl = url.toLocaleLowerCase();
-    var ext = lcUrl.split('.').pop();
+    const lcUrl = url.toLocaleLowerCase();
+    const ext = lcUrl.split('.').pop();
     if (ext in KnownImageExtensions) {
         return `<a href='${link}' target='_blank'><img src='${link}' style='max-width: 400px; max-height: 300px;'></a>`
     }
@@ -60,18 +61,18 @@ function getLinkReplacement(link: string): string {
 }
 
 function processMediaLinks(text: string): string {
-    var res = text;
-    var startIdx = res.indexOf("<a href=");
+    let res = text;
+    let startIdx = res.indexOf("<a href=");
     while (startIdx >= 0) {
-        var endIdx = res.indexOf("</a>", startIdx);
+        let endIdx = res.indexOf("</a>", startIdx);
         if (endIdx < 0) {
             break;
         }
-        var hrefStartIdx = startIdx + 9;
-        var hrefEndIdx = res.indexOf('"', hrefStartIdx + 1);
+        const hrefStartIdx = startIdx + 9;
+        const hrefEndIdx = res.indexOf('"', hrefStartIdx + 1);
         if (hrefEndIdx > 0) {
-            var link = res.substring(hrefStartIdx, hrefEndIdx);
-            var replacement = getLinkReplacement(link);
+            const link = res.substring(hrefStartIdx, hrefEndIdx);
+            const replacement = getLinkReplacement(link);
             if (replacement != null) {
                 res = res.substring(0, startIdx) + replacement + res.substring(endIdx + 4);
                 endIdx = startIdx + replacement.length;
