@@ -484,16 +484,6 @@
 	"use strict";
 	var $ = __webpack_require__(4);
 	var cookies_1 = __webpack_require__(9);
-	var ChordsViewMode;
-	(function (ChordsViewMode) {
-	    ChordsViewMode[ChordsViewMode["Inlined"] = 0] = "Inlined";
-	    ChordsViewMode[ChordsViewMode["Hidden"] = 1] = "Hidden";
-	})(ChordsViewMode || (ChordsViewMode = {}));
-	var TextViewMode;
-	(function (TextViewMode) {
-	    TextViewMode[TextViewMode["Visible"] = 0] = "Visible";
-	    TextViewMode[TextViewMode["Hidden"] = 1] = "Hidden";
-	})(TextViewMode || (TextViewMode = {}));
 	var SONG_VIEW_COOKIE = "song-view";
 	var MIN_ZOOM = 50;
 	var MAX_ZOOM = 200;
@@ -567,26 +557,14 @@
 	}
 	function renderSong(options) {
 	    var $song = $(options.targetSelector);
-	    var textViewMode = !options.textViewMode || options.textViewMode == "Hidden" ? TextViewMode.Hidden : TextViewMode.Visible;
-	    if (textViewMode == TextViewMode.Hidden) {
-	        $song.html("");
-	        return;
-	    }
 	    var text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-	    var chordsViewMode = !options.chordsMode || options.chordsMode == "Hidden" ? ChordsViewMode.Hidden : ChordsViewMode.Inlined;
-	    var showChords = chordsViewMode == ChordsViewMode.Inlined;
 	    var song = parseSong(text);
 	    var buf = "";
 	    for (var ic = 0; ic < song.couplets.length; ic++) {
 	        var couplet = song.couplets[ic];
 	        for (var il = 0; il < couplet.lines.length; il++) {
 	            var line = couplet.lines[il];
-	            if (showChords) {
-	                buf += renderLineWithInlinedChords(line);
-	            }
-	            else {
-	                buf += line.text;
-	            }
+	            buf += renderLineWithInlinedChords(line);
 	            buf += "\n";
 	        }
 	        buf += "\n";
@@ -620,8 +598,6 @@
 	}
 	exports.__esModule = true;
 	exports["default"] = {
-	    TextViewMode: TextViewMode,
-	    ChordsViewMode: ChordsViewMode,
 	    renderSong: renderSong,
 	    zoom: zoom
 	};

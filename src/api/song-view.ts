@@ -20,16 +20,6 @@ interface SVSong {
     couplets: Array<SVCouplet>;
 }
 
-enum ChordsViewMode {
-    Inlined,
-    Hidden,
-}
-
-enum TextViewMode {
-    Visible,
-    Hidden,
-}
-
 const SONG_VIEW_COOKIE = "song-view";
 interface SongViewClientSettings {
     zoom?: number;
@@ -74,8 +64,6 @@ function parseSong(text: string): SVSong {
 interface RenderSongOptions {
     text: string
     targetSelector: string
-    chordsMode?: ChordsViewMode | string;
-    textViewMode?: TextViewMode | string
 }
 
 const validNotes = {
@@ -119,14 +107,7 @@ function applyMultilineModeClass(song: SVSong, $song: JQuery) {
 
 function renderSong(options: RenderSongOptions): void {
     const $song = $(options.targetSelector);
-    const textViewMode = !options.textViewMode || options.textViewMode == "Hidden" ? TextViewMode.Hidden : TextViewMode.Visible;
-    if (textViewMode == TextViewMode.Hidden) {
-        $song.html("");
-        return;
-    }
     const text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    const chordsViewMode = !options.chordsMode || options.chordsMode == "Hidden" ? ChordsViewMode.Hidden : ChordsViewMode.Inlined;
-    const showChords = chordsViewMode == ChordsViewMode.Inlined;
     const song = parseSong(text);
     let buf = "";
 
@@ -134,11 +115,7 @@ function renderSong(options: RenderSongOptions): void {
         const couplet = song.couplets[ic];
         for (let il = 0; il < couplet.lines.length; il++) {
             const line = couplet.lines[il];
-            if (showChords) {
-                buf += renderLineWithInlinedChords(line);
-            } else {
-                buf += line.text;
-            }
+            buf += renderLineWithInlinedChords(line);
             buf += "\n";
         }
         buf += "\n";
@@ -181,9 +158,6 @@ function zoom(command: ZoomCommand): void {
 
 
 export default {
-    TextViewMode: TextViewMode,
-    ChordsViewMode: ChordsViewMode,
-
     renderSong: renderSong,
     zoom: zoom,
 }
