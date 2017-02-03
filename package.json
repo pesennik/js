@@ -9,7 +9,8 @@
     "url": "https://github.com/pessennik/js.git"
   },
   "devDependencies": {
-    "typescript": "2.1.5"
+    "typescript": "2.1.5",
+    "webpack": "2.2.1"
   },
   "dependencies": {
     "autolinker": "1.4.0",
