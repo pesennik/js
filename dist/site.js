@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 11);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -94,6 +94,326 @@ exports["default"] = {
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+ * Based On "Chord Image Generator" http://einaregilsson.com/2009/07/23/chord-image-generator/
+ */
+
+var NO_FINGER = '-';
+var OPEN = 0;
+var MUTED = -1;
+var FRET_COUNT = 5;
+var FONT_NAME = "Arial";
+var FOREGROUND_BRUSH = '#000';
+var BACKGROUND_BRUSH = '#FFF';
+var PenStyle = (function () {
+    function PenStyle(color, size) {
+        this.color = color;
+        this.size = size;
+    }
+    PenStyle.prototype.apply = function (ctx) {
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.size;
+        ctx.lineCap = 'round';
+    };
+    return PenStyle;
+}());
+var FontStyle = (function () {
+    function FontStyle(fontName, size) {
+        this.fontName = fontName;
+        this.size = size;
+    }
+    FontStyle.prototype.apply = function (ctx) {
+        ctx.font = this.size + "px " + this.fontName;
+        ctx.textBaseline = "top";
+    };
+    return FontStyle;
+}());
+var Painter = (function () {
+    function Painter(ctx) {
+        this.ctx = ctx;
+    }
+    Painter.prototype.drawLine = function (style, x1, y1, x2, y2) {
+        this.ctx.beginPath();
+        style.apply(this.ctx);
+        this.ctx.moveTo(x1, y1);
+        this.ctx.lineTo(x2, y2);
+        this.ctx.stroke();
+    };
+    Painter.prototype.fillRectangle = function (color, x1, y1, x2, y2) {
+        this.ctx.beginPath();
+        this.ctx.fillStyle = color;
+        this.ctx.rect(x1, y1, x2, y2);
+        this.ctx.fill();
+    };
+    Painter.prototype.drawCircle = function (style, x1, y1, diameter) {
+        var radius = diameter / 2;
+        this.ctx.beginPath();
+        style.apply(this.ctx);
+        this.ctx.arc(x1 + radius, y1 + radius, radius, 0, 2 * Math.PI, false);
+        this.ctx.stroke();
+    };
+    Painter.prototype.fillCircle = function (color, x1, y1, diameter) {
+        var radius = diameter / 2;
+        this.ctx.beginPath();
+        this.ctx.fillStyle = color;
+        this.ctx.arc(x1 + radius, y1 + radius, radius, 0, 2 * Math.PI, false);
+        this.ctx.fill();
+    };
+    Painter.prototype.measureString = function (text, style) {
+        style.apply(this.ctx);
+        return this.ctx.measureText(text);
+    };
+    Painter.prototype.drawString = function (text, style, color, x, y) {
+        style.apply(this.ctx);
+        this.ctx.fillStyle = color;
+        this.ctx.fillText(text, x, y);
+    };
+    return Painter;
+}());
+var Chord = (function () {
+    function Chord(name, chord, fingers, size) {
+        this.chordPositions = [];
+        this.fingers = [NO_FINGER, NO_FINGER, NO_FINGER, NO_FINGER, NO_FINGER, NO_FINGER];
+        // parse chord name
+        if (name == null || typeof name == 'undefined') {
+            this.chordName = "";
+        }
+        else {
+            this.chordName = name.replace(" ", "");
+        }
+        this.parseChord(chord);
+        // parse fingers
+        var f = String(fingers).toUpperCase() + '------';
+        f = f.replace(/[^\-T1234]/g, '');
+        this.fingers = f.substr(0, 6).split('');
+        // set up sizes
+        this.size = parseFloat(size);
+        if (isNaN(this.size)) {
+            this.size = 1;
+        }
+        this.fretWidth = 4 * this.size;
+        this.nutHeight = this.fretWidth / 2;
+        this.lineWidth = Math.ceil(this.size * 0.31);
+        this.dotWidth = Math.ceil(0.9 * this.fretWidth);
+        this.markerWidth = 0.7 * this.fretWidth;
+        this.boxWidth = 5 * this.fretWidth + 6 * this.lineWidth;
+        this.boxHeight = FRET_COUNT * (this.fretWidth + this.lineWidth) + this.lineWidth;
+        var percent = 0.8;
+        this.fretFontSize = this.fretWidth / percent;
+        this.fingerFontSize = this.fretWidth * 0.8;
+        this.nameFontSize = this.fretWidth * 2 / percent;
+        this.superScriptFontSize = 0.7 * this.nameFontSize;
+        if (this.size == 1) {
+            this.nameFontSize += 2;
+            this.fingerFontSize += 2;
+            this.fretFontSize += 2;
+            this.superScriptFontSize += 2;
+        }
+        this.xStart = this.fretWidth;
+        this.yStart = Math.round(0.2 * this.superScriptFontSize + this.nameFontSize + this.nutHeight + 1.7 * this.markerWidth);
+        this.imageWidth = (this.boxWidth + 5 * this.fretWidth);
+        this.imageHeight = (this.boxHeight + this.yStart + this.fretWidth + this.fretWidth);
+        this.signWidth = (this.fretWidth * 0.75);
+        this.signRadius = this.signWidth / 2;
+    }
+    Chord.prototype.parseChord = function (chord) {
+        if (chord == null || typeof chord == 'undefined' || !chord.match(/[\dxX]{6}|((1|2)?[\dxX]-){5}(1|2)?[\dxX]/)) {
+            this.error = true;
+            return;
+        }
+        var parts;
+        if (chord.length > 6) {
+            parts = chord.split('-');
+        }
+        else {
+            parts = chord.split('');
+        }
+        var maxFret = 0;
+        var minFret = Number.MAX_VALUE;
+        for (var i = 0; i < 6; i++) {
+            if (parts[i].toUpperCase() == "X") {
+                this.chordPositions[i] = MUTED;
+            }
+            else {
+                this.chordPositions[i] = parseInt(parts[i]);
+                maxFret = Math.max(maxFret, this.chordPositions[i]);
+                if (this.chordPositions[i] != 0) {
+                    minFret = Math.min(minFret, this.chordPositions[i]);
+                }
+            }
+        }
+        if (maxFret <= 5) {
+            this.baseFret = 1;
+        }
+        else {
+            this.baseFret = minFret;
+        }
+    };
+    Chord.prototype.draw = function (ctx) {
+        this.graphics = new Painter(ctx);
+        this.graphics.fillRectangle(BACKGROUND_BRUSH, 0, 0, this.imageWidth, this.imageHeight);
+        if (this.error) {
+            //Draw red x
+            var errorPen = new PenStyle("red", 3);
+            this.graphics.drawLine(errorPen, 0, 0, this.imageWidth, this.imageHeight);
+            this.graphics.drawLine(errorPen, 0, this.imageHeight, this.imageWidth, 0);
+        }
+        else {
+            this.drawChordBox();
+            this.drawChordPositions();
+            this.drawChordName();
+            this.drawFingers();
+            this.drawBars();
+        }
+    };
+    Chord.prototype.drawChordBox = function () {
+        var pen = new PenStyle(FOREGROUND_BRUSH, this.lineWidth);
+        var totalFretWidth = this.fretWidth + this.lineWidth;
+        for (var i = 0; i <= FRET_COUNT; i++) {
+            var y = this.yStart + i * totalFretWidth;
+            this.graphics.drawLine(pen, this.xStart, y, this.xStart + this.boxWidth - this.lineWidth, y);
+        }
+        for (var i = 0; i < 6; i++) {
+            var x = this.xStart + (i * totalFretWidth);
+            this.graphics.drawLine(pen, x, this.yStart, x, this.yStart + this.boxHeight - this.lineWidth);
+        }
+        if (this.baseFret == 1) {
+            //Need to draw the nut
+            var nutHeight = this.fretWidth / 2;
+            this.graphics.fillRectangle(FOREGROUND_BRUSH, this.xStart - this.lineWidth / 2, this.yStart - nutHeight, this.boxWidth, nutHeight);
+        }
+    };
+    Chord.prototype.drawBars = function () {
+        var bars = {};
+        for (var i = 0; i < 5; i++) {
+            if (this.chordPositions[i] != MUTED && this.chordPositions[i] != OPEN && this.fingers[i] != NO_FINGER && !bars.hasOwnProperty(this.fingers[i])) {
+                var bar = { 'Str': i, 'Pos': this.chordPositions[i], 'Length': 0, 'Finger': this.fingers[i] };
+                for (var j = i + 1; j < 6; j++) {
+                    if (this.fingers[j] == bar['Finger'] && this.chordPositions[j] == this.chordPositions[i]) {
+                        bar['Length'] = j - i;
+                    }
+                }
+                if (bar['Length'] > 0) {
+                    bars[bar['Finger']] = bar;
+                }
+            }
+        }
+        var totalFretWidth = this.fretWidth + this.lineWidth;
+        for (var b in bars) {
+            if (bars.hasOwnProperty(b)) {
+                var bar = bars[b];
+                var xStart = this.xStart + bar['Str'] * totalFretWidth;
+                var xEnd = xStart + bar['Length'] * totalFretWidth;
+                var y = this.yStart + (bar['Pos'] - this.baseFret + 1) * totalFretWidth - (totalFretWidth / 2);
+                var pen = new PenStyle(FOREGROUND_BRUSH, this.dotWidth / 2);
+                this.graphics.drawLine(pen, xStart, y, xEnd, y);
+            }
+        }
+    };
+    Chord.prototype.drawChordPositions = function () {
+        var yOffset = this.yStart - this.fretWidth;
+        var totalFretWidth = this.fretWidth + this.lineWidth;
+        for (var i = 0; i < this.chordPositions.length; i++) {
+            var absolutePos = this.chordPositions[i];
+            var relativePos = absolutePos - this.baseFret + 1;
+            var xPos = this.xStart - (0.5 * this.fretWidth) + (0.5 * this.lineWidth) + (i * totalFretWidth);
+            if (relativePos > 0) {
+                var yPos = relativePos * totalFretWidth + yOffset;
+                this.graphics.fillCircle(FOREGROUND_BRUSH, xPos, yPos, this.dotWidth);
+            }
+            else if (absolutePos == OPEN) {
+                var pen = new PenStyle(FOREGROUND_BRUSH, this.lineWidth);
+                var yPos = this.yStart - this.fretWidth;
+                var markerXPos = xPos + ((this.dotWidth - this.markerWidth) / 2);
+                if (this.baseFret == 1) {
+                    yPos -= this.nutHeight;
+                }
+                this.graphics.drawCircle(pen, markerXPos, yPos, this.markerWidth);
+            }
+            else if (absolutePos == MUTED) {
+                var pen = new PenStyle(FOREGROUND_BRUSH, this.lineWidth * 1.5);
+                var yPos = this.yStart - this.fretWidth;
+                var markerXPos = xPos + ((this.dotWidth - this.markerWidth) / 2);
+                if (this.baseFret == 1) {
+                    yPos -= this.nutHeight;
+                }
+                this.graphics.drawLine(pen, markerXPos, yPos, markerXPos + this.markerWidth, yPos + this.markerWidth);
+                this.graphics.drawLine(pen, markerXPos, yPos + this.markerWidth, markerXPos + this.markerWidth, yPos);
+            }
+        }
+    };
+    Chord.prototype.drawFingers = function () {
+        var xPos = this.xStart + (0.5 * this.lineWidth);
+        var yPos = this.yStart + this.boxHeight;
+        var fontStyle = new FontStyle(FONT_NAME, this.fingerFontSize);
+        for (var f = 0; f < this.fingers.length; f++) {
+            var finger = this.fingers[f];
+            if (finger != NO_FINGER) {
+                var charSize = this.graphics.measureString(finger.toString(), fontStyle);
+                this.graphics.drawString(finger.toString(), fontStyle, FOREGROUND_BRUSH, xPos - (0.5 * charSize.width), yPos);
+            }
+            xPos += (this.fretWidth + this.lineWidth);
+        }
+    };
+    Chord.prototype.drawChordName = function () {
+        var nameFontStyle = new FontStyle(FONT_NAME, this.nameFontSize);
+        var superFontStyle = new FontStyle(FONT_NAME, this.superScriptFontSize);
+        var name;
+        var supers;
+        if (this.chordName.indexOf('_') == -1) {
+            name = this.chordName;
+            supers = "";
+        }
+        else {
+            var parts = this.chordName.split('_');
+            name = parts[0];
+            supers = parts[1];
+        }
+        var stringSize = this.graphics.measureString(name, nameFontStyle);
+        var xTextStart = this.xStart;
+        if (stringSize.width < this.boxWidth) {
+            xTextStart = this.xStart + ((this.boxWidth - stringSize.width) / 2);
+        }
+        this.graphics.drawString(name, nameFontStyle, FOREGROUND_BRUSH, xTextStart, 0.2 * this.superScriptFontSize);
+        if (supers != "") {
+            this.graphics.drawString(supers, superFontStyle, FOREGROUND_BRUSH, xTextStart + 0.8 * stringSize.width, 0);
+        }
+        if (this.baseFret > 1) {
+            var fretFontStyle = new FontStyle(FONT_NAME, this.fretFontSize);
+            var offset = (this.fretFontSize - this.fretWidth) / 2;
+            this.graphics.drawString(this.baseFret + "fr", fretFontStyle, FOREGROUND_BRUSH, this.xStart + this.boxWidth + 0.4 * this.fretWidth, this.yStart - offset);
+        }
+    };
+    return Chord;
+}());
+//example: <chord name="A" positions="X02220" fingers="--222-" size="7" ></chord>
+function renderChords(root) {
+    var chords = root.getElementsByTagName("chord");
+    for (var i = 0; i < chords.length; ++i) {
+        var e = chords[i];
+        var name_1 = e.getAttribute("name");
+        var positions = e.getAttribute("positions");
+        var fingers = e.getAttribute("fingers");
+        var size = e.getAttribute("size");
+        var chord = new Chord(name_1, positions, fingers, size);
+        var canvas = document.createElement("canvas");
+        canvas.setAttribute("width", "" + chord.imageWidth);
+        canvas.setAttribute("height", "" + chord.imageHeight);
+        e.parentNode.insertBefore(canvas, e);
+        chord.draw(canvas.getContext("2d"));
+    }
+}
+exports.__esModule = true;
+exports["default"] = {
+    renderChords: renderChords
+};
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports) {
 
 if (window.Parsley) {
@@ -126,7 +446,7 @@ if (window.Parsley) {
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -138,20 +458,22 @@ exports["default"] = {
     /** Set of utility functions */
     Utils: undefined,
     /** Song rendering engine */
-    SongView: undefined
+    SongView: undefined,
+    /** Chords drawing library */
+    Chords: undefined
 };
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var $ = __webpack_require__(0);
-var Autolinker = __webpack_require__(9);
-var links_1 = __webpack_require__(7);
-var sidebar_1 = __webpack_require__(8);
+var Autolinker = __webpack_require__(10);
+var links_1 = __webpack_require__(8);
+var sidebar_1 = __webpack_require__(9);
 function setTitle(selector, title, root) {
     root = root ? root : window.document.body;
     $(root).find(selector).each(function () {
@@ -333,7 +655,7 @@ exports["default"] = {
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -460,7 +782,7 @@ exports["default"] = {
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -649,7 +971,7 @@ exports["default"] = {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -739,7 +1061,7 @@ exports["default"] = {
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -830,25 +1152,27 @@ exports["default"] = {
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = window.Autolinker;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var site_def_1 = __webpack_require__(3);
-__webpack_require__(2);
-var site_utils_1 = __webpack_require__(4);
-var song_view_1 = __webpack_require__(5);
-var tuner_1 = __webpack_require__(6);
+var site_def_1 = __webpack_require__(4);
+__webpack_require__(3);
+var site_utils_1 = __webpack_require__(5);
+var song_view_1 = __webpack_require__(6);
+var tuner_1 = __webpack_require__(7);
+var chords_1 = __webpack_require__(2);
 site_def_1["default"].Tuner = tuner_1["default"];
 site_def_1["default"].Utils = site_utils_1["default"];
 site_def_1["default"].SongView = song_view_1["default"];
+site_def_1["default"].Chords = chords_1["default"];
 window.$site = site_def_1["default"];
 
 

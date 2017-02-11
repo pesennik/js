@@ -3,7 +3,7 @@ function set(key: string, value: string) {
 }
 
 function get(key: string): string {
-    var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+    const keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
     return keyValue ? keyValue[2] : "{}";
 }
 
