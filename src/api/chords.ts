@@ -156,9 +156,9 @@ class Chord {
         }
         this.xStart = this.fretWidth;
         this.yStart = Math.round(0.2 * this.superScriptFontSize + this.nameFontSize + this.nutHeight + 1.7 * this.markerWidth);
-        this.imageWidth = (this.boxWidth + 5 * this.fretWidth);
-        this.imageHeight = (this.boxHeight + this.yStart + this.fretWidth + this.fretWidth);
-        this.signWidth = (this.fretWidth * 0.75);
+        this.imageWidth = this.boxWidth + 2 * this.fretWidth; // +2 fret width for borders
+        this.imageHeight = this.boxHeight + this.yStart;
+        this.signWidth = this.fretWidth * 0.75;
         this.signRadius = this.signWidth / 2;
     }
 
@@ -206,7 +206,7 @@ class Chord {
             this.drawChordBox();
             this.drawChordPositions();
             this.drawChordName();
-            this.drawFingers();
+            //TODO: make optional: this.drawFingers();
             this.drawBars();
         }
     }

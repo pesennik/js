@@ -1,4 +1,5 @@
-interface  Chord {
+interface  Accord {
+    name: string,
     positions: string,
     fingers: string
 }
@@ -24,17 +25,17 @@ const CHORDS = {
 
     // Minor
     "Am": "x02210&f=--231-",
-    "Am#": "x13321&f=113421",
+    "A#m": "x13321&f=113421",
     "Bm": "x24432&f=113421",
     "Cm": "x35543&f=113421",
-    "Cm#": "x46654&f=113421",
+    "C#m": "x46654&f=113421",
     "Dm": "xx0231&f=---231",
-    "Dm#": "x68876",
+    "D#m": "x68876",
     "Em": "022000&f=-23---",
     "Fm": "133111&f=134111",
-    "Fm#": "244222&f=134111",
+    "F#m": "244222&f=134111",
     "Gm": "355333&f=134111",
-    "Gm#": "466444&f=134111",
+    "G#m": "466444&f=134111",
 
     // Diminished
     "Adim": "x0121x",
@@ -197,21 +198,21 @@ const CHORDS = {
     ///////////// 5th /////////////
 
     "A5": "x022xx&f=--11--",
-    "A5#": "x133xx&f=--11--",
+    "A#5": "x133xx&f=--11--",
     "B5": "x244xx&f=-134--",
     "C5": "x355xx&f=-134--",
-    "C5#": "x466xx",
+    "C#5": "x466xx",
     "D5": "xx023x",
-    "D5#": "xx134x",
+    "D#5": "xx134x",
     "E5": "022xxx&f=-11---",
     "F5": "133xxx&f=134---",
-    "F5#": "244xxx",
+    "F#5": "244xxx",
     "G5": "xxx033",
-    "G5#": "xxx144",
+    "G#5": "xxx144",
 
 };
 
-function getChord(name: string): Chord {
+function getChord(name: string): Accord {
     if (!name || name.length == 0) {
         return null;
     }
@@ -226,8 +227,9 @@ function getChord(name: string): Chord {
     }
     const tokens = res.split("&");
     return {
+        name: name,
         positions: tokens[0],
-        fingers: tokens[1]
+        fingers: tokens.length > 1 && tokens[1] ? tokens[1] : ""
     };
 }
 export default {

@@ -18,7 +18,7 @@ interface LinkifyOptions {
 }
 
 function linkify(text: string, options: LinkifyOptions): string {
-    var autolinker = new Autolinker({
+    const autolinker = new Autolinker({
         urls: {
             schemeMatches: true,
             wwwMatches: true,
@@ -39,7 +39,7 @@ function linkify(text: string, options: LinkifyOptions): string {
         className: ""
     });
 
-    var res = autolinker.link(text);
+    const res = autolinker.link(text);
     if (options && options.skipMediaLinks) {
         return res;
     }
@@ -142,14 +142,14 @@ function enableScrollTop(): void {
 }
 
 function removeServerSideParsleyError(el: HTMLElement) {
-    var p: Parsley = $(el).parsley();
+    const p: Parsley = $(el).parsley();
     p.removeError("server-side-parsley-error");
 }
 
 function shuffleArray(array: Array<any>): void {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
         array[i] = array[j];
         array[j] = temp;
     }

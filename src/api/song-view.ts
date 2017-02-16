@@ -1,4 +1,6 @@
 import * as $ from "jquery";
+import ChordsLib from "./chords-lib";
+import Chords from "./chords";
 import Cookies from "./cookies";
 
 // SV (SongView) models
@@ -18,6 +20,7 @@ interface SVCouplet {
 
 interface SVSong {
     couplets: Array<SVCouplet>;
+    chords: Array<string>
 }
 
 const SONG_VIEW_COOKIE = "song-view";
@@ -28,7 +31,7 @@ const MIN_ZOOM = 50;
 const MAX_ZOOM = 200;
 
 function parseSong(text: string): SVSong {
-    const song: SVSong = {couplets: []};
+    const song: SVSong = {couplets: [], chords: []};
     let couplet: SVCouplet = null;
     const lines = text.split("\n");
     for (let i = 0; i < lines.length; i++) {
@@ -55,6 +58,9 @@ function parseSong(text: string): SVSong {
             svLine.text += line.substring(partStartIdx, idx);
             svLine.chords.push({name: chord, position: svLine.text.length});
             partStartIdx = endIdx + 1;
+            if (song.chords.indexOf(chord) < 0) {
+                song.chords.push(chord);
+            }
         }
         svLine.text += line.substring(partStartIdx);
     }
@@ -63,8 +69,10 @@ function parseSong(text: string): SVSong {
 
 interface RenderSongOptions {
     text: string
-    targetSelector: string
+    songViewSelector: string
+    chordsViewSelector?: string
 }
+
 
 const validNotes = {
     'A': true, 'B': true, 'C': true, 'D': true, 'E': true, 'F': true, 'G': true, 'H': true,
@@ -74,6 +82,7 @@ const validNotes = {
 function isValidChordName(chord: string) {
     return chord && chord.length > 0 && chord.length <= 7 && validNotes[chord.charAt(0)];
 }
+
 function renderLineWithInlinedChords(line: SVLine): string {
     if (line.chords.length == 0) {
         return line.text;
@@ -106,23 +115,39 @@ function applyMultilineModeClass(song: SVSong, $song: JQuery) {
 }
 
 function renderSong(options: RenderSongOptions): void {
-    const $song = $(options.targetSelector);
-    const text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    const song = parseSong(text);
-    let buf = "";
+    try {
+        const $song = $(options.songViewSelector);
+        const text = options.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const song = parseSong(text);
+        let buf = "";
 
-    for (let ic = 0; ic < song.couplets.length; ic++) {
-        const couplet = song.couplets[ic];
-        for (let il = 0; il < couplet.lines.length; il++) {
-            const line = couplet.lines[il];
-            buf += renderLineWithInlinedChords(line);
+        for (let ic = 0; ic < song.couplets.length; ic++) {
+            const couplet = song.couplets[ic];
+            for (let il = 0; il < couplet.lines.length; il++) {
+                const line = couplet.lines[il];
+                buf += renderLineWithInlinedChords(line);
+                buf += "\n";
+            }
             buf += "\n";
         }
-        buf += "\n";
+        $song.html(buf);
+        applyMultilineModeClass(song, $song);
+        applyStyles($song);
+
+        if (options.chordsViewSelector) {
+            const $chordsView = $(options.chordsViewSelector);
+            song.chords.forEach(chordName => {
+                let accord = ChordsLib.getChord(chordName);
+                if (accord != null) {
+                    let fingers = accord.fingers.length > 0 ? ` fingers="${accord.fingers}"` : "";
+                    $(`<chord name="${accord.name}" positions="${accord.positions}" ${fingers} size="2"/>`).appendTo($chordsView);
+                }
+            });
+            Chords.renderChords($chordsView.get(0));
+        }
+    } catch (err) {
+        console.log(err);
     }
-    $song.html(buf);
-    applyMultilineModeClass(song, $song);
-    applyStyles($song);
 }
 
 function isValidZoom(zoom?: number): boolean {
