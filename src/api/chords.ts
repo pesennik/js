@@ -293,6 +293,7 @@ class Chord {
         }
     }
 
+    //noinspection JSUnusedLocalSymbols
     private drawFingers() {
         let xPos = this.xStart + (0.5 * this.lineWidth);
         const yPos = this.yStart + this.boxHeight;
@@ -339,6 +340,10 @@ class Chord {
     }
 }
 
+function copyAttributes(from: Element, to: Element, attrNames: string[]) {
+    attrNames.forEach(attr => from.getAttribute(attr) != null && to.setAttribute(attr, from.getAttribute(attr)));
+}
+
 //example: <chord name="A" positions="X02220" fingers="--222-" size="7" ></chord>
 function renderChords(root: HTMLElement) {
     const chords = root.getElementsByTagName("chord");
@@ -352,6 +357,7 @@ function renderChords(root: HTMLElement) {
         const canvas = document.createElement("canvas");
         canvas.setAttribute("width", "" + chord.imageWidth);
         canvas.setAttribute("height", "" + chord.imageHeight);
+        copyAttributes(e, canvas, ["style", "onclick", "title"]);
         e.parentNode.insertBefore(canvas, e);
         chord.draw(canvas.getContext("2d"));
     }

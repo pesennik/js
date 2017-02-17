@@ -140,7 +140,11 @@ function renderSong(options: RenderSongOptions): void {
                 let accord = ChordsLib.getChord(chordName);
                 if (accord != null) {
                     let fingers = accord.fingers.length > 0 ? ` fingers="${accord.fingers}"` : "";
-                    $(`<chord name="${accord.name}" positions="${accord.positions}" ${fingers} size="2"/>`).appendTo($chordsView);
+                    let playJs = `$site.Utils.playChord('${chordName}')`;
+                    let style = "cursor:pointer";
+                    let title = `${chordName} - проиграть`;
+                    $(`<chord name="${accord.name}" positions="${accord.positions}" ${fingers} size="2" onclick="${playJs}" style="${style}" title="${title}"/>`)
+                        .appendTo($chordsView);
                 }
             });
             Chords.renderChords($chordsView.get(0));

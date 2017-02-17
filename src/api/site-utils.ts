@@ -183,6 +183,12 @@ function scrollToBlock(selector: string): void {
     });
 }
 
+function playChord(chordName: string) {
+    let mediaName = encodeURIComponent(chordName.replace("H", "B"));
+    let url = `https://pesennik.online/static/chords/${mediaName}.m4a`;
+    new Audio(url).play();
+}
+
 export default {
     setTitle: setTitle,
     linkify: linkify,
@@ -197,5 +203,6 @@ export default {
     scrollToRandomSong: scrollToRandomSong,
     scrollToBlock: scrollToBlock,
     playYoutube: links.playYoutube,
-    initSidebar: sidebar.initSidebar
+    initSidebar: sidebar.initSidebar,
+    playChord: playChord
 }

@@ -8,7 +8,6 @@ import Chords from "./api/chords";
 site.Tuner = Tuner;
 site.Utils = SiteUtils;
 site.SongView = SongView;
-site.Chords = Chords;
 
 (<any>window).$site = site;
 

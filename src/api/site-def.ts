@@ -8,7 +8,4 @@ export default {
 
     /** Song rendering engine */
     SongView: undefined,
-
-    /** Chords drawing library */
-    Chords: undefined,
 }
