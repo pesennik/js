@@ -136,6 +136,7 @@ function renderSong(options: RenderSongOptions): void {
 
         if (options.chordsViewSelector) {
             const $chordsView = $(options.chordsViewSelector);
+            $chordsView.empty();
             song.chords.forEach(chordName => {
                 let accord = ChordsLib.getChord(chordName);
                 if (accord != null) {

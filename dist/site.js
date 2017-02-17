@@ -442,6 +442,7 @@ function renderSong(options) {
         applyStyles($song);
         if (options.chordsViewSelector) {
             var $chordsView_1 = $(options.chordsViewSelector);
+            $chordsView_1.empty();
             song.chords.forEach(function (chordName) {
                 var accord = chords_lib_1["default"].getChord(chordName);
                 if (accord != null) {
