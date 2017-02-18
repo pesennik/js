@@ -9,8 +9,15 @@ KnownAudioExtensions["wav"] = true;
 KnownAudioExtensions["ogg"] = true;
 
 function playYoutube(el: HTMLElement) {
+
+    // Pause any currently playing video first
+    const frames = window.document.getElementsByTagName("iframe");
+    for (let i = 0; i < frames.length; i++) {
+        frames.item(i).contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
+    }
+
     // Create an iFrame with autoplay set to true
-    let iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1";
+    let iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1&enablejsapi=1&&version=3";
     if ($(el).data('params')) {
         iframeUrl += '&' + $(this).data('params')
     }
@@ -18,6 +25,7 @@ function playYoutube(el: HTMLElement) {
     // The height and width of the iFrame should be the same as parent
     const iframe = $('<iframe/>', {'frameborder': '0', 'src': iframeUrl, 'width': $(el).width(), 'height': $(el).height()});
     iframe.attr("allowfullscreen", "allowfullscreen");
+    iframe.attr("allowscriptaccess", "always");
 
     // Replace the YouTube thumbnail with YouTube HTML5 Player
     $(el).parent().css("paddingTop", 0);

@@ -1240,14 +1240,20 @@ KnownAudioExtensions["mp3"] = true;
 KnownAudioExtensions["wav"] = true;
 KnownAudioExtensions["ogg"] = true;
 function playYoutube(el) {
+    // Pause any currently playing video first
+    var frames = window.document.getElementsByTagName("iframe");
+    for (var i = 0; i < frames.length; i++) {
+        frames.item(i).contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
+    }
     // Create an iFrame with autoplay set to true
-    var iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1";
+    var iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1&enablejsapi=1&&version=3";
     if ($(el).data('params')) {
         iframeUrl += '&' + $(this).data('params');
     }
     // The height and width of the iFrame should be the same as parent
     var iframe = $('<iframe/>', { 'frameborder': '0', 'src': iframeUrl, 'width': $(el).width(), 'height': $(el).height() });
     iframe.attr("allowfullscreen", "allowfullscreen");
+    iframe.attr("allowscriptaccess", "always");
     // Replace the YouTube thumbnail with YouTube HTML5 Player
     $(el).parent().css("paddingTop", 0);
     $(el).replaceWith(iframe);
