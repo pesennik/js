@@ -18,7 +18,7 @@ function adjustSidebarToWindowSize() {
     $contentBlock.css("padding-left", $sidebar.css("width"));
 
     let $bottomBlock = $sidebar.find(".sidebar-bottom-block");
-    $bottomBlock.removeClass("sidebar-bottom")
+    $bottomBlock.removeClass("sidebar-bottom");
 
     function imagesAreBig() {
         return $images.height() >= 50;
