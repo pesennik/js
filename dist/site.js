@@ -78,6 +78,7 @@ module.exports = $;
 
 "use strict";
 
+exports.__esModule = true;
 function set(key, value) {
     document.cookie = key + '=' + value + ';expires=Fri, 31 Dec 9999 23:59:59 GMT';
 }
@@ -85,7 +86,6 @@ function get(key) {
     var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
     return keyValue ? keyValue[2] : "{}";
 }
-exports.__esModule = true;
 exports["default"] = {
     set: set,
     get: get
@@ -148,6 +148,7 @@ exports["default"] = {
 
 "use strict";
 
+exports.__esModule = true;
 var $ = __webpack_require__(0);
 var Autolinker = __webpack_require__(11);
 var links_1 = __webpack_require__(9);
@@ -318,7 +319,6 @@ function playChord(chordName) {
     var url = "https://pesennik.online/static/chords/" + mediaName + ".m4a";
     new Audio(url).play();
 }
-exports.__esModule = true;
 exports["default"] = {
     setTitle: setTitle,
     linkify: linkify,
@@ -344,6 +344,7 @@ exports["default"] = {
 
 "use strict";
 
+exports.__esModule = true;
 var $ = __webpack_require__(0);
 var chords_lib_1 = __webpack_require__(7);
 var chords_1 = __webpack_require__(8);
@@ -484,7 +485,6 @@ function zoom(command) {
     cookies_1["default"].set(SONG_VIEW_COOKIE, JSON.stringify(s));
     applyStyles($(".song-text"));
 }
-exports.__esModule = true;
 exports["default"] = {
     renderSong: renderSong,
     zoom: zoom
@@ -497,6 +497,7 @@ exports["default"] = {
 
 "use strict";
 
+exports.__esModule = true;
 var $ = __webpack_require__(0);
 var cookies_1 = __webpack_require__(1);
 var TUNER_COOKIE = "tuner";
@@ -674,7 +675,6 @@ var Tuner = (function () {
 function init(options) {
     return new Tuner(options);
 }
-exports.__esModule = true;
 exports["default"] = {
     init: init
 };
@@ -686,6 +686,7 @@ exports["default"] = {
 
 "use strict";
 
+exports.__esModule = true;
 //noinspection SpellCheckingInspection
 var CHORDS = {
     ///////////// Triads /////////////
@@ -894,7 +895,6 @@ function getChord(name) {
         fingers: tokens.length > 1 && tokens[1] ? tokens[1] : ""
     };
 }
-exports.__esModule = true;
 exports["default"] = {
     getChord: getChord
 };
@@ -909,6 +909,7 @@ exports["default"] = {
  * Based On "Chord Image Generator" http://einaregilsson.com/2009/07/23/chord-image-generator/
  */
 
+exports.__esModule = true;
 var NO_FINGER = '-';
 var OPEN = 0;
 var MUTED = -1;
@@ -1219,7 +1220,6 @@ function renderChords(root) {
         chord.draw(canvas.getContext("2d"));
     }
 }
-exports.__esModule = true;
 exports["default"] = {
     renderChords: renderChords
 };
@@ -1231,6 +1231,7 @@ exports["default"] = {
 
 "use strict";
 
+exports.__esModule = true;
 var KnownImageExtensions = {};
 KnownImageExtensions["png"] = true;
 KnownImageExtensions["jpg"] = true;
@@ -1314,7 +1315,6 @@ function processMediaLinks(text) {
     }
     return res;
 }
-exports.__esModule = true;
 exports["default"] = {
     processMediaLinks: processMediaLinks,
     playYoutube: playYoutube
@@ -1327,6 +1327,7 @@ exports["default"] = {
 
 "use strict";
 
+exports.__esModule = true;
 var forceShowMenu = false;
 function adjustSidebarToWindowSize() {
     var $sidebar = $("#sidebar");
@@ -1406,7 +1407,6 @@ function initSidebar() {
     document.body.addEventListener("click", handleTouchAndClick);
     document.body.addEventListener("touchmove", handleTouchAndClick);
 }
-exports.__esModule = true;
 exports["default"] = {
     initSidebar: initSidebar
 };
@@ -1424,6 +1424,7 @@ module.exports = window.Autolinker;
 
 "use strict";
 
+exports.__esModule = true;
 var site_def_1 = __webpack_require__(3);
 __webpack_require__(2);
 var site_utils_1 = __webpack_require__(4);
