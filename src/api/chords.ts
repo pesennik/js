@@ -164,7 +164,7 @@ class Chord {
 
 
     private parseChord(chord: string): void {
-        if (chord == null || typeof chord == 'undefined' || !chord.match(/[\dxX]{6}|((1|2)?[\dxX]-){5}(1|2)?[\dxX]/)) {
+        if (chord == null || typeof chord == 'undefined' || !chord.match(/[\dxX]{6}|(([12])?[\dxX]-){5}([12])?[\dxX]/)) {
             this.error = true;
             return;
         }

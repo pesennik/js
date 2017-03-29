@@ -41,7 +41,7 @@ class Tuner {
         let toneType = this.$toneTypeSelector.val();
         this.tonesPath = options.tonesPath ? options.tonesPath : "/tones";
         for (let toneIdx = 1; toneIdx <= 6; toneIdx++) {
-            var $b = this.$el.find(".tuner-button-s" + toneIdx);
+            const $b = this.$el.find(".tuner-button-s" + toneIdx);
             if ($b.length <= 0) {
                 continue;
             }
@@ -146,7 +146,7 @@ class Tuner {
     public playPrev() {
         let currentToneIdx = this.lastPlayed.toneIdx;
         let prev: ToneButton;
-        for (var i = 0; i < this.buttons.length; i++) {
+        for (let i = 0; i < this.buttons.length; i++) {
             let b = this.buttons[i];
             if (b.toneIdx < currentToneIdx) {
                 if (!prev || b.toneIdx > prev.toneIdx) {
@@ -161,7 +161,7 @@ class Tuner {
     public playNext() {
         let currentToneIdx = this.lastPlayed.toneIdx;
         let next: ToneButton;
-        for (var i = 0; i < this.buttons.length; i++) {
+        for (let i = 0; i < this.buttons.length; i++) {
             let b = this.buttons[i];
             if (b.toneIdx > currentToneIdx) {
                 if (!next || b.toneIdx < next.toneIdx) {
@@ -174,7 +174,7 @@ class Tuner {
     }
 
     public nextTone() {
-        var $selected = this.$toneTypeSelector.find("option:selected");
+        const $selected = this.$toneTypeSelector.find("option:selected");
         let $next = $selected.next();
         if ($next.length == 0) {
             $next = this.$toneTypeSelector.find("option").first();
@@ -194,7 +194,7 @@ class Tuner {
             tone: this.$toneTypeSelector.val(),
             repeat: this.$repeat.prop("checked")
         };
-        var cookieVal = JSON.stringify(state);
+        const cookieVal = JSON.stringify(state);
         Cookies.set(TUNER_COOKIE, cookieVal);
     }
 

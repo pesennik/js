@@ -13,6 +13,7 @@ function playYoutube(el: HTMLElement) {
     // Pause any currently playing video first
     const frames = window.document.getElementsByTagName("iframe");
     for (let i = 0; i < frames.length; i++) {
+        //noinspection TypeScriptUnresolvedVariable
         frames.item(i).contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
     }
 
