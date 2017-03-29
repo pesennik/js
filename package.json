@@ -1,6 +1,6 @@
 {
   "name": "pesennik-js",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Scripts and widgets for Pesennik.Online",
   "author": "Mikhail Fursov <mike.fursov@gmail.com> (https://github.com/pesennik)",
   "license": "MIT",
@@ -9,8 +9,8 @@
     "url": "https://github.com/pesennik/js.git"
   },
   "devDependencies": {
-    "typescript": "2.2.1",
-    "webpack": "2.2.1"
+    "typescript": "2.2.2",
+    "webpack": "2.3.2"
   },
   "dependencies": {
     "autolinker": "1.4.2",
@@ -18,7 +18,7 @@
     "jquery": "v=1.12.4",
     "loglevel": "1.4.1",
     "parsleyjs": "2.7.0",
-    "ts-loader": "2.0.1"
+    "ts-loader": "2.0.3"
   },
   "scripts": {
     "build": "webpack"
