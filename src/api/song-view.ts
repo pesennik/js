@@ -14,6 +14,7 @@ interface SVLine {
     text: string,
     chords: Array<SVChord>
 }
+
 interface SVCouplet {
     lines: Array<SVLine>;
 }
@@ -123,12 +124,14 @@ function renderSong(options: RenderSongOptions): void {
 
         for (let ic = 0; ic < song.couplets.length; ic++) {
             const couplet = song.couplets[ic];
+            const breakCouplets = couplet.lines.length > 6;
+            buf += "<div " + (breakCouplets ? "" : "style='break-inside: avoid-column'") + ">";
             for (let il = 0; il < couplet.lines.length; il++) {
                 const line = couplet.lines[il];
                 buf += renderLineWithInlinedChords(line);
                 buf += "\n";
             }
-            buf += "\n";
+            buf += "</div>\n";
         }
         $song.html(buf);
         applyMultilineModeClass(song, $song);
