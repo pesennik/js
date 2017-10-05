@@ -6,9 +6,9 @@
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -32,9 +32,6 @@
 /******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
 /******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
@@ -63,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -94,6 +91,41 @@ exports["default"] = {
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+var site_def_1 = __webpack_require__(3);
+__webpack_require__(4);
+var site_utils_1 = __webpack_require__(5);
+var song_view_1 = __webpack_require__(9);
+var tuner_1 = __webpack_require__(12);
+site_def_1["default"].Tuner = tuner_1["default"];
+site_def_1["default"].Utils = site_utils_1["default"];
+site_def_1["default"].SongView = song_view_1["default"];
+window.$site = site_def_1["default"];
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+exports["default"] = {
+    /** Guitar Tuner API */
+    Tuner: undefined,
+    /** Set of utility functions */
+    Utils: undefined,
+    /** Song rendering engine */
+    SongView: undefined
+};
+
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports) {
 
 if (window.Parsley) {
@@ -126,33 +158,16 @@ if (window.Parsley) {
 
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-exports.__esModule = true;
-exports["default"] = {
-    /** Guitar Tuner API */
-    Tuner: undefined,
-    /** Set of utility functions */
-    Utils: undefined,
-    /** Song rendering engine */
-    SongView: undefined
-};
-
-
-/***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
 var $ = __webpack_require__(0);
-var Autolinker = __webpack_require__(12);
-var links_1 = __webpack_require__(9);
-var sidebar_1 = __webpack_require__(10);
+var Autolinker = __webpack_require__(6);
+var links_1 = __webpack_require__(7);
+var sidebar_1 = __webpack_require__(8);
 function setTitle(selector, title, root) {
     root = root ? root : window.document.body;
     $(root).find(selector).each(function () {
@@ -339,15 +354,209 @@ exports["default"] = {
 
 
 /***/ }),
-/* 5 */
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = window.Autolinker;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+var KnownImageExtensions = {};
+KnownImageExtensions["png"] = true;
+KnownImageExtensions["jpg"] = true;
+KnownImageExtensions["gif"] = true;
+var KnownAudioExtensions = {};
+KnownAudioExtensions["mp3"] = true;
+KnownAudioExtensions["wav"] = true;
+KnownAudioExtensions["ogg"] = true;
+function playYoutube(el) {
+    // Pause any currently playing video first
+    var frames = window.document.getElementsByTagName("iframe");
+    for (var i = 0; i < frames.length; i++) {
+        //noinspection TypeScriptUnresolvedVariable
+        frames.item(i).contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
+    }
+    // Create an iFrame with autoplay set to true
+    var iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1&enablejsapi=1&&version=3";
+    if ($(el).data('params')) {
+        iframeUrl += '&' + $(this).data('params');
+    }
+    // The height and width of the iFrame should be the same as parent
+    var iframe = $('<iframe/>', { 'frameborder': '0', 'src': iframeUrl, 'width': $(el).width(), 'height': $(el).height() });
+    iframe.attr("allowfullscreen", "allowfullscreen");
+    iframe.attr("allowscriptaccess", "always");
+    // Replace the YouTube thumbnail with YouTube HTML5 Player
+    $(el).parent().css("paddingTop", 0);
+    $(el).replaceWith(iframe);
+}
+function getYoutubeVideoId(url) {
+    var p = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
+    return (url.match(p)) ? RegExp.$1 : null;
+}
+function replaceWithYoutubeEmbed(url, fallback) {
+    var videoId = getYoutubeVideoId(url);
+    if (!videoId) {
+        return fallback;
+    }
+    var style = "background-image: url(https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg);";
+    return "<div class=\"youtube-aspect-ratio\"><div id='" + videoId + "' class='youtube' style='" + style + "' onclick='$site.Utils.playYoutube(this);'><div class='play'></div></div></div>";
+}
+function getLinkReplacement(link) {
+    var lcLink = link.toLocaleLowerCase();
+    var url = link;
+    if (lcLink.indexOf("http://") == 0) {
+        url = link.substr(7);
+    }
+    else if (lcLink.indexOf("https://") == 0) {
+        url = link.substr(8);
+    }
+    var lcUrl = url.toLocaleLowerCase();
+    var ext = lcUrl.split('.').pop();
+    if (ext in KnownImageExtensions) {
+        return "<a href='" + link + "' target='_blank'><img src='" + link + "' style='max-width: 400px; max-height: 300px;'></a>";
+    }
+    if (ext in KnownAudioExtensions) {
+        return "<audio controls><source src='" + link + "'></audio>";
+    }
+    if (getYoutubeVideoId(url) != null) {
+        return replaceWithYoutubeEmbed(url, null);
+    }
+    return null;
+}
+function processMediaLinks(text) {
+    var res = text;
+    var startIdx = res.indexOf("<a href=");
+    while (startIdx >= 0) {
+        var endIdx = res.indexOf("</a>", startIdx);
+        if (endIdx < 0) {
+            break;
+        }
+        var hrefStartIdx = startIdx + 9;
+        var hrefEndIdx = res.indexOf('"', hrefStartIdx + 1);
+        if (hrefEndIdx > 0) {
+            var link = res.substring(hrefStartIdx, hrefEndIdx);
+            var replacement = getLinkReplacement(link);
+            if (replacement != null) {
+                res = res.substring(0, startIdx) + replacement + res.substring(endIdx + 4);
+                endIdx = startIdx + replacement.length;
+            }
+        }
+        startIdx = res.indexOf("<a href=", endIdx);
+    }
+    return res;
+}
+exports["default"] = {
+    processMediaLinks: processMediaLinks,
+    playYoutube: playYoutube
+};
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+exports.__esModule = true;
+var forceShowMenu = false;
+function adjustSidebarToWindowSize() {
+    var $sidebar = $("#sidebar");
+    var $sidebarToggle = $("#sidebar-toggle");
+    var $images = $sidebar.find("img");
+    var $spacers = $sidebar.find(".sidebar-spacer");
+    var $menuText = $sidebar.find(".sidebar-menu-text");
+    var $contentBlock = $("#content-block");
+    if (window.innerWidth < 800 && !forceShowMenu) {
+        $sidebar.fadeOut(700);
+        $sidebarToggle.fadeIn();
+        $contentBlock.css("padding-left", 0);
+        return;
+    }
+    $sidebar.fadeIn();
+    $sidebarToggle.fadeOut();
+    $contentBlock.css("padding-left", $sidebar.css("width"));
+    var $bottomBlock = $sidebar.find(".sidebar-bottom-block");
+    $bottomBlock.removeClass("sidebar-bottom");
+    function imagesAreBig() {
+        return $images.height() >= 50;
+    }
+    function getSidebarFreeSpace() {
+        var $el = $sidebar.find(".sidebar-nav div").last();
+        var lastElementBottom = $el.offset().top + $el.height();
+        return $sidebar.offset().top + $sidebar.height() - lastElementBottom;
+    }
+    // First: show until fit
+    if (!imagesAreBig() && getSidebarFreeSpace() >= $images.length * 20) {
+        $images.height(50);
+        $images.width(50);
+        $sidebar.css("width", 80);
+        $contentBlock.css("padding-left", 80);
+    }
+    if (!$menuText.is(":visible") && imagesAreBig() && getSidebarFreeSpace() >= 20 * $sidebar.find("a").length) {
+        $menuText.show();
+        $sidebar.find("a").css("margin-bottom", "5");
+    }
+    if (!$spacers.is(":visible") && $menuText.is(":visible") && getSidebarFreeSpace() >= 50 * $spacers.length) {
+        $spacers.show();
+    }
+    if (getSidebarFreeSpace() > 0) {
+        $bottomBlock.addClass("sidebar-bottom");
+    }
+    // Next: hide until does not fit
+    if ($spacers.is(":visible") && getSidebarFreeSpace() < 0) {
+        $spacers.hide();
+    }
+    if ($menuText.is(":visible") && getSidebarFreeSpace() < 0) {
+        $sidebar.find("a").css("margin-bottom", "0");
+        $menuText.hide();
+    }
+    if (getSidebarFreeSpace() < 0) {
+        $bottomBlock.removeClass("sidebar-bottom");
+    }
+    if (imagesAreBig() && getSidebarFreeSpace() < 0) {
+        $images.height(30);
+        $images.width(30);
+        $sidebar.css("width", 50);
+        $contentBlock.css("padding-left", 50);
+    }
+}
+function initSidebar() {
+    $(document).ready(adjustSidebarToWindowSize);
+    $(window).resize(adjustSidebarToWindowSize);
+    $("#sidebar-toggle").click(function (e) {
+        forceShowMenu = true;
+        adjustSidebarToWindowSize();
+        e.originalEvent["forceShowMenuClick"] = true;
+    });
+    function handleTouchAndClick(e) {
+        if (forceShowMenu && !e["forceShowMenuClick"]) {
+            forceShowMenu = false;
+            adjustSidebarToWindowSize();
+        }
+    }
+    document.body.addEventListener("click", handleTouchAndClick);
+    document.body.addEventListener("touchmove", handleTouchAndClick);
+}
+exports["default"] = {
+    initSidebar: initSidebar
+};
+
+
+/***/ }),
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
 var $ = __webpack_require__(0);
-var chords_lib_1 = __webpack_require__(7);
-var chords_1 = __webpack_require__(8);
+var chords_lib_1 = __webpack_require__(10);
+var chords_1 = __webpack_require__(11);
 var cookies_1 = __webpack_require__(1);
 var SONG_VIEW_COOKIE = "song-view";
 var MIN_ZOOM = 50;
@@ -494,196 +703,7 @@ exports["default"] = {
 
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-exports.__esModule = true;
-var $ = __webpack_require__(0);
-var cookies_1 = __webpack_require__(1);
-var TUNER_COOKIE = "tuner";
-var Tuner = (function () {
-    function Tuner(options) {
-        var _this = this;
-        this.buttons = [];
-        this.stopped = false;
-        this.$el = $(options.selector);
-        this.$repeat = this.$el.find(".tuner-repeat-checkbox");
-        this.$toneTypeSelector = this.$el.find(".tuner-tone-type-selector");
-        this.readLastState();
-        var toneType = this.$toneTypeSelector.val();
-        this.tonesPath = options.tonesPath ? options.tonesPath : "/tones";
-        var _loop_1 = function (toneIdx) {
-            var $b = this_1.$el.find(".tuner-button-s" + toneIdx);
-            if ($b.length <= 0) {
-                return "continue";
-            }
-            var b = { $el: $b, audio: document.createElement('audio'), toneIdx: toneIdx };
-            b.audio.setAttribute("src", this_1.tonesPath + "/" + toneType + toneIdx + ".mp3");
-            b.$el.click(function () {
-                if (b.audio.paused) {
-                    _this.play(b);
-                }
-                else {
-                    _this.stop();
-                }
-            });
-            this_1.registerAudio(b);
-            this_1.buttons.push(b);
-            Tuner.updateButtonUI(b);
-            this_1.lastPlayed = this_1.lastPlayed ? this_1.lastPlayed : b;
-        };
-        var this_1 = this;
-        for (var toneIdx = 1; toneIdx <= 6; toneIdx++) {
-            _loop_1(toneIdx);
-        }
-        this.$toneTypeSelector.change(function () { return _this.updateActiveTone(); });
-        this.$repeat.change(function () { return _this.saveState(); });
-        $(document).keydown(function (e) {
-            if (!_this.$el.is(":visible")) {
-                return;
-            }
-            if (e.which >= 49 && e.which <= 54) {
-                _this.$el.find(".tuner-button-s" + String.fromCharCode(e.which)).click();
-            }
-            else if (e.which == 37 || e.which == 90 || e.which == 122) {
-                _this.playPrev();
-            }
-            else if (e.which == 39 || e.which == 88 || e.which == 120) {
-                _this.playNext();
-            }
-            else if (e.which == 32 || e.which == 67 || e.which == 99) {
-                _this.togglePlay();
-            }
-            else if (e.which == 86 || e.which == 118 || e.which == 48 || e.which == 45 || e.which == 96) {
-                _this.$repeat.click();
-            }
-            else if (e.which == 38 || e.which == 40 || e.which == 66 || e.which == 98) {
-                _this.nextTone();
-            }
-        });
-    }
-    Tuner.prototype.updateActiveTone = function () {
-        var toneType = this.$toneTypeSelector.val();
-        for (var i = 0; i < this.buttons.length; i++) {
-            var b = this.buttons[i];
-            b.audio.remove();
-            b.audio = document.createElement('audio');
-            b.audio.setAttribute("src", this.tonesPath + "/" + toneType + b.toneIdx + ".mp3");
-            this.registerAudio(b);
-        }
-        this.saveState();
-    };
-    Tuner.prototype.registerAudio = function (b) {
-        var self = this;
-        b.audio.addEventListener("pause", function () {
-            Tuner.updateButtonUI(b);
-        });
-        b.audio.addEventListener("playing", function () {
-            Tuner.updateButtonUI(b);
-        });
-        b.audio.addEventListener("ended", function () {
-            if (self.$repeat.is(":checked") && !self.stopped && self.$el.is(":visible")) {
-                self.play(b);
-                return;
-            }
-            Tuner.updateButtonUI(b);
-        });
-    };
-    Tuner.prototype.stop = function () {
-        this.stopped = true;
-        this.pauseAll();
-    };
-    Tuner.prototype.pauseAll = function () {
-        for (var i = 0; i < this.buttons.length; i++) {
-            var b = this.buttons[i];
-            b.audio.pause();
-        }
-    };
-    Tuner.prototype.play = function (b) {
-        this.pauseAll();
-        b.audio.currentTime = 0;
-        this.stopped = false;
-        b.audio.play();
-        this.lastPlayed = b;
-    };
-    Tuner.prototype.togglePlay = function () {
-        if (this.lastPlayed.audio.paused) {
-            this.play(this.lastPlayed);
-        }
-        else {
-            this.stop();
-        }
-    };
-    Tuner.prototype.playPrev = function () {
-        var currentToneIdx = this.lastPlayed.toneIdx;
-        var prev;
-        for (var i = 0; i < this.buttons.length; i++) {
-            var b = this.buttons[i];
-            if (b.toneIdx < currentToneIdx) {
-                if (!prev || b.toneIdx > prev.toneIdx) {
-                    prev = b;
-                }
-            }
-        }
-        prev = prev ? prev : this.buttons[this.buttons.length - 1];
-        this.play(prev);
-    };
-    Tuner.prototype.playNext = function () {
-        var currentToneIdx = this.lastPlayed.toneIdx;
-        var next;
-        for (var i = 0; i < this.buttons.length; i++) {
-            var b = this.buttons[i];
-            if (b.toneIdx > currentToneIdx) {
-                if (!next || b.toneIdx < next.toneIdx) {
-                    next = b;
-                }
-            }
-        }
-        next = next ? next : this.buttons[0];
-        this.play(next);
-    };
-    Tuner.prototype.nextTone = function () {
-        var $selected = this.$toneTypeSelector.find("option:selected");
-        var $next = $selected.next();
-        if ($next.length == 0) {
-            $next = this.$toneTypeSelector.find("option").first();
-        }
-        $selected.prop("selected", false);
-        $next.prop("selected", true);
-        this.updateActiveTone();
-    };
-    Tuner.updateButtonUI = function (b) {
-        b.$el.removeClass(b.audio.paused ? "tuner-button-on" : "tuner-button-off");
-        b.$el.addClass(b.audio.paused ? "tuner-button-off" : "tuner-button-on");
-    };
-    Tuner.prototype.saveState = function () {
-        var state = {
-            tone: this.$toneTypeSelector.val(),
-            repeat: this.$repeat.prop("checked")
-        };
-        var cookieVal = JSON.stringify(state);
-        cookies_1["default"].set(TUNER_COOKIE, cookieVal);
-    };
-    Tuner.prototype.readLastState = function () {
-        var cookieVal = cookies_1["default"].get(TUNER_COOKIE);
-        var state = JSON.parse(cookieVal);
-        this.$repeat.prop("checked", state.repeat == true);
-        this.$toneTypeSelector.val(state.tone ? state.tone : "c");
-    };
-    return Tuner;
-}());
-function init(options) {
-    return new Tuner(options);
-}
-exports["default"] = {
-    init: init
-};
-
-
-/***/ }),
-/* 7 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -903,14 +923,14 @@ exports["default"] = {
 
 
 /***/ }),
-/* 8 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
 /*
  * Based On "Chord Image Generator" http://einaregilsson.com/2009/07/23/chord-image-generator/
  */
-
 exports.__esModule = true;
 var NO_FINGER = '-';
 var OPEN = 0;
@@ -919,7 +939,7 @@ var FRET_COUNT = 5;
 var FONT_NAME = "Arial";
 var FOREGROUND_BRUSH = '#000';
 var BACKGROUND_BRUSH = '#FFF';
-var PenStyle = (function () {
+var PenStyle = /** @class */ (function () {
     function PenStyle(color, size) {
         this.color = color;
         this.size = size;
@@ -931,7 +951,7 @@ var PenStyle = (function () {
     };
     return PenStyle;
 }());
-var FontStyle = (function () {
+var FontStyle = /** @class */ (function () {
     function FontStyle(fontName, size) {
         this.fontName = fontName;
         this.size = size;
@@ -942,7 +962,7 @@ var FontStyle = (function () {
     };
     return FontStyle;
 }());
-var Painter = (function () {
+var Painter = /** @class */ (function () {
     function Painter(ctx) {
         this.ctx = ctx;
     }
@@ -984,7 +1004,7 @@ var Painter = (function () {
     };
     return Painter;
 }());
-var Chord = (function () {
+var Chord = /** @class */ (function () {
     function Chord(name, chord, fingers, size) {
         this.chordPositions = [];
         this.fingers = [NO_FINGER, NO_FINGER, NO_FINGER, NO_FINGER, NO_FINGER, NO_FINGER];
@@ -1228,216 +1248,193 @@ exports["default"] = {
 
 
 /***/ }),
-/* 9 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
-var KnownImageExtensions = {};
-KnownImageExtensions["png"] = true;
-KnownImageExtensions["jpg"] = true;
-KnownImageExtensions["gif"] = true;
-var KnownAudioExtensions = {};
-KnownAudioExtensions["mp3"] = true;
-KnownAudioExtensions["wav"] = true;
-KnownAudioExtensions["ogg"] = true;
-function playYoutube(el) {
-    // Pause any currently playing video first
-    var frames = window.document.getElementsByTagName("iframe");
-    for (var i = 0; i < frames.length; i++) {
-        //noinspection TypeScriptUnresolvedVariable
-        frames.item(i).contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
-    }
-    // Create an iFrame with autoplay set to true
-    var iframeUrl = "https://www.youtube.com/embed/" + el.id + "?autoplay=1&autohide=1&enablejsapi=1&&version=3";
-    if ($(el).data('params')) {
-        iframeUrl += '&' + $(this).data('params');
-    }
-    // The height and width of the iFrame should be the same as parent
-    var iframe = $('<iframe/>', { 'frameborder': '0', 'src': iframeUrl, 'width': $(el).width(), 'height': $(el).height() });
-    iframe.attr("allowfullscreen", "allowfullscreen");
-    iframe.attr("allowscriptaccess", "always");
-    // Replace the YouTube thumbnail with YouTube HTML5 Player
-    $(el).parent().css("paddingTop", 0);
-    $(el).replaceWith(iframe);
-}
-function getYoutubeVideoId(url) {
-    var p = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
-    return (url.match(p)) ? RegExp.$1 : null;
-}
-function replaceWithYoutubeEmbed(url, fallback) {
-    var videoId = getYoutubeVideoId(url);
-    if (!videoId) {
-        return fallback;
-    }
-    var style = "background-image: url(https://img.youtube.com/vi/" + videoId + "/mqdefault.jpg);";
-    return "<div class=\"youtube-aspect-ratio\"><div id='" + videoId + "' class='youtube' style='" + style + "' onclick='$site.Utils.playYoutube(this);'><div class='play'></div></div></div>";
-}
-function getLinkReplacement(link) {
-    var lcLink = link.toLocaleLowerCase();
-    var url = link;
-    if (lcLink.indexOf("http://") == 0) {
-        url = link.substr(7);
-    }
-    else if (lcLink.indexOf("https://") == 0) {
-        url = link.substr(8);
-    }
-    var lcUrl = url.toLocaleLowerCase();
-    var ext = lcUrl.split('.').pop();
-    if (ext in KnownImageExtensions) {
-        return "<a href='" + link + "' target='_blank'><img src='" + link + "' style='max-width: 400px; max-height: 300px;'></a>";
-    }
-    if (ext in KnownAudioExtensions) {
-        return "<audio controls><source src='" + link + "'></audio>";
-    }
-    if (getYoutubeVideoId(url) != null) {
-        return replaceWithYoutubeEmbed(url, null);
-    }
-    return null;
-}
-function processMediaLinks(text) {
-    var res = text;
-    var startIdx = res.indexOf("<a href=");
-    while (startIdx >= 0) {
-        var endIdx = res.indexOf("</a>", startIdx);
-        if (endIdx < 0) {
-            break;
+var $ = __webpack_require__(0);
+var cookies_1 = __webpack_require__(1);
+var TUNER_COOKIE = "tuner";
+var Tuner = /** @class */ (function () {
+    function Tuner(options) {
+        var _this = this;
+        this.buttons = [];
+        this.stopped = false;
+        this.$el = $(options.selector);
+        this.$repeat = this.$el.find(".tuner-repeat-checkbox");
+        this.$toneTypeSelector = this.$el.find(".tuner-tone-type-selector");
+        this.readLastState();
+        var toneType = this.$toneTypeSelector.val();
+        this.tonesPath = options.tonesPath ? options.tonesPath : "/tones";
+        var _loop_1 = function (toneIdx) {
+            var $b = this_1.$el.find(".tuner-button-s" + toneIdx);
+            if ($b.length <= 0) {
+                return "continue";
+            }
+            var b = { $el: $b, audio: document.createElement('audio'), toneIdx: toneIdx };
+            b.audio.setAttribute("src", this_1.tonesPath + "/" + toneType + toneIdx + ".mp3");
+            b.$el.click(function () {
+                if (b.audio.paused) {
+                    _this.play(b);
+                }
+                else {
+                    _this.stop();
+                }
+            });
+            this_1.registerAudio(b);
+            this_1.buttons.push(b);
+            Tuner.updateButtonUI(b);
+            this_1.lastPlayed = this_1.lastPlayed ? this_1.lastPlayed : b;
+        };
+        var this_1 = this;
+        for (var toneIdx = 1; toneIdx <= 6; toneIdx++) {
+            _loop_1(toneIdx);
         }
-        var hrefStartIdx = startIdx + 9;
-        var hrefEndIdx = res.indexOf('"', hrefStartIdx + 1);
-        if (hrefEndIdx > 0) {
-            var link = res.substring(hrefStartIdx, hrefEndIdx);
-            var replacement = getLinkReplacement(link);
-            if (replacement != null) {
-                res = res.substring(0, startIdx) + replacement + res.substring(endIdx + 4);
-                endIdx = startIdx + replacement.length;
+        this.$toneTypeSelector.change(function () { return _this.updateActiveTone(); });
+        this.$repeat.change(function () { return _this.saveState(); });
+        $(document).keydown(function (e) {
+            if (!_this.$el.is(":visible")) {
+                return;
+            }
+            if (e.which >= 49 && e.which <= 54) {
+                _this.$el.find(".tuner-button-s" + String.fromCharCode(e.which)).click();
+            }
+            else if (e.which == 37 || e.which == 90 || e.which == 122) {
+                _this.playPrev();
+            }
+            else if (e.which == 39 || e.which == 88 || e.which == 120) {
+                _this.playNext();
+            }
+            else if (e.which == 32 || e.which == 67 || e.which == 99) {
+                _this.togglePlay();
+            }
+            else if (e.which == 86 || e.which == 118 || e.which == 48 || e.which == 45 || e.which == 96) {
+                _this.$repeat.click();
+            }
+            else if (e.which == 38 || e.which == 40 || e.which == 66 || e.which == 98) {
+                _this.nextTone();
+            }
+        });
+    }
+    Tuner.prototype.updateActiveTone = function () {
+        var toneType = this.$toneTypeSelector.val();
+        for (var i = 0; i < this.buttons.length; i++) {
+            var b = this.buttons[i];
+            b.audio.remove();
+            b.audio = document.createElement('audio');
+            b.audio.setAttribute("src", this.tonesPath + "/" + toneType + b.toneIdx + ".mp3");
+            this.registerAudio(b);
+        }
+        this.saveState();
+    };
+    Tuner.prototype.registerAudio = function (b) {
+        var self = this;
+        b.audio.addEventListener("pause", function () {
+            Tuner.updateButtonUI(b);
+        });
+        b.audio.addEventListener("playing", function () {
+            Tuner.updateButtonUI(b);
+        });
+        b.audio.addEventListener("ended", function () {
+            if (self.$repeat.is(":checked") && !self.stopped && self.$el.is(":visible")) {
+                self.play(b);
+                return;
+            }
+            Tuner.updateButtonUI(b);
+        });
+    };
+    Tuner.prototype.stop = function () {
+        this.stopped = true;
+        this.pauseAll();
+    };
+    Tuner.prototype.pauseAll = function () {
+        for (var i = 0; i < this.buttons.length; i++) {
+            var b = this.buttons[i];
+            b.audio.pause();
+        }
+    };
+    Tuner.prototype.play = function (b) {
+        this.pauseAll();
+        b.audio.currentTime = 0;
+        this.stopped = false;
+        b.audio.play();
+        this.lastPlayed = b;
+    };
+    Tuner.prototype.togglePlay = function () {
+        if (this.lastPlayed.audio.paused) {
+            this.play(this.lastPlayed);
+        }
+        else {
+            this.stop();
+        }
+    };
+    Tuner.prototype.playPrev = function () {
+        var currentToneIdx = this.lastPlayed.toneIdx;
+        var prev;
+        for (var i = 0; i < this.buttons.length; i++) {
+            var b = this.buttons[i];
+            if (b.toneIdx < currentToneIdx) {
+                if (!prev || b.toneIdx > prev.toneIdx) {
+                    prev = b;
+                }
             }
         }
-        startIdx = res.indexOf("<a href=", endIdx);
-    }
-    return res;
-}
-exports["default"] = {
-    processMediaLinks: processMediaLinks,
-    playYoutube: playYoutube
-};
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-exports.__esModule = true;
-var forceShowMenu = false;
-function adjustSidebarToWindowSize() {
-    var $sidebar = $("#sidebar");
-    var $sidebarToggle = $("#sidebar-toggle");
-    var $images = $sidebar.find("img");
-    var $spacers = $sidebar.find(".sidebar-spacer");
-    var $menuText = $sidebar.find(".sidebar-menu-text");
-    var $contentBlock = $("#content-block");
-    if (window.innerWidth < 800 && !forceShowMenu) {
-        $sidebar.fadeOut(700);
-        $sidebarToggle.fadeIn();
-        $contentBlock.css("padding-left", 0);
-        return;
-    }
-    $sidebar.fadeIn();
-    $sidebarToggle.fadeOut();
-    $contentBlock.css("padding-left", $sidebar.css("width"));
-    var $bottomBlock = $sidebar.find(".sidebar-bottom-block");
-    $bottomBlock.removeClass("sidebar-bottom");
-    function imagesAreBig() {
-        return $images.height() >= 50;
-    }
-    function getSidebarFreeSpace() {
-        var $el = $sidebar.find(".sidebar-nav div").last();
-        var lastElementBottom = $el.offset().top + $el.height();
-        return $sidebar.offset().top + $sidebar.height() - lastElementBottom;
-    }
-    // First: show until fit
-    if (!imagesAreBig() && getSidebarFreeSpace() >= $images.length * 20) {
-        $images.height(50);
-        $images.width(50);
-        $sidebar.css("width", 80);
-        $contentBlock.css("padding-left", 80);
-    }
-    if (!$menuText.is(":visible") && imagesAreBig() && getSidebarFreeSpace() >= 20 * $sidebar.find("a").length) {
-        $menuText.show();
-        $sidebar.find("a").css("margin-bottom", "5");
-    }
-    if (!$spacers.is(":visible") && $menuText.is(":visible") && getSidebarFreeSpace() >= 50 * $spacers.length) {
-        $spacers.show();
-    }
-    if (getSidebarFreeSpace() > 0) {
-        $bottomBlock.addClass("sidebar-bottom");
-    }
-    // Next: hide until does not fit
-    if ($spacers.is(":visible") && getSidebarFreeSpace() < 0) {
-        $spacers.hide();
-    }
-    if ($menuText.is(":visible") && getSidebarFreeSpace() < 0) {
-        $sidebar.find("a").css("margin-bottom", "0");
-        $menuText.hide();
-    }
-    if (getSidebarFreeSpace() < 0) {
-        $bottomBlock.removeClass("sidebar-bottom");
-    }
-    if (imagesAreBig() && getSidebarFreeSpace() < 0) {
-        $images.height(30);
-        $images.width(30);
-        $sidebar.css("width", 50);
-        $contentBlock.css("padding-left", 50);
-    }
-}
-function initSidebar() {
-    $(document).ready(adjustSidebarToWindowSize);
-    $(window).resize(adjustSidebarToWindowSize);
-    $("#sidebar-toggle").click(function (e) {
-        forceShowMenu = true;
-        adjustSidebarToWindowSize();
-        e.originalEvent["forceShowMenuClick"] = true;
-    });
-    function handleTouchAndClick(e) {
-        if (forceShowMenu && !e["forceShowMenuClick"]) {
-            forceShowMenu = false;
-            adjustSidebarToWindowSize();
+        prev = prev ? prev : this.buttons[this.buttons.length - 1];
+        this.play(prev);
+    };
+    Tuner.prototype.playNext = function () {
+        var currentToneIdx = this.lastPlayed.toneIdx;
+        var next;
+        for (var i = 0; i < this.buttons.length; i++) {
+            var b = this.buttons[i];
+            if (b.toneIdx > currentToneIdx) {
+                if (!next || b.toneIdx < next.toneIdx) {
+                    next = b;
+                }
+            }
         }
-    }
-    document.body.addEventListener("click", handleTouchAndClick);
-    document.body.addEventListener("touchmove", handleTouchAndClick);
+        next = next ? next : this.buttons[0];
+        this.play(next);
+    };
+    Tuner.prototype.nextTone = function () {
+        var $selected = this.$toneTypeSelector.find("option:selected");
+        var $next = $selected.next();
+        if ($next.length == 0) {
+            $next = this.$toneTypeSelector.find("option").first();
+        }
+        $selected.prop("selected", false);
+        $next.prop("selected", true);
+        this.updateActiveTone();
+    };
+    Tuner.updateButtonUI = function (b) {
+        b.$el.removeClass(b.audio.paused ? "tuner-button-on" : "tuner-button-off");
+        b.$el.addClass(b.audio.paused ? "tuner-button-off" : "tuner-button-on");
+    };
+    Tuner.prototype.saveState = function () {
+        var state = {
+            tone: this.$toneTypeSelector.val(),
+            repeat: this.$repeat.prop("checked")
+        };
+        var cookieVal = JSON.stringify(state);
+        cookies_1["default"].set(TUNER_COOKIE, cookieVal);
+    };
+    Tuner.prototype.readLastState = function () {
+        var cookieVal = cookies_1["default"].get(TUNER_COOKIE);
+        var state = JSON.parse(cookieVal);
+        this.$repeat.prop("checked", state.repeat == true);
+        this.$toneTypeSelector.val(state.tone ? state.tone : "c");
+    };
+    return Tuner;
+}());
+function init(options) {
+    return new Tuner(options);
 }
 exports["default"] = {
-    initSidebar: initSidebar
+    init: init
 };
 
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-exports.__esModule = true;
-var site_def_1 = __webpack_require__(3);
-__webpack_require__(2);
-var site_utils_1 = __webpack_require__(4);
-var song_view_1 = __webpack_require__(5);
-var tuner_1 = __webpack_require__(6);
-site_def_1["default"].Tuner = tuner_1["default"];
-site_def_1["default"].Utils = site_utils_1["default"];
-site_def_1["default"].SongView = song_view_1["default"];
-window.$site = site_def_1["default"];
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports) {
-
-module.exports = window.Autolinker;
 
 /***/ })
 /******/ ]);
