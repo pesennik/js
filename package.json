@@ -9,16 +9,16 @@
     "url": "https://github.com/pesennik/js.git"
   },
   "devDependencies": {
-    "typescript": "2.2.2",
-    "webpack": "2.3.2"
+    "typescript": "2.5.3",
+    "webpack": "3.6.0"
   },
   "dependencies": {
-    "autolinker": "1.4.2",
+    "autolinker": "1.4.4",
     "bootstrap": "3.3.7",
     "jquery": "v=1.12.4",
-    "loglevel": "1.4.1",
-    "parsleyjs": "2.7.0",
-    "ts-loader": "2.0.3"
+    "loglevel": "1.5.0",
+    "parsleyjs": "2.8.0",
+    "ts-loader": "2.3.7"
   },
   "scripts": {
     "build": "webpack"
